@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useSettingsContext } from '../../../../../../core/context';
 import { ComponentType } from './typing/constanst';
 
+import type { ButtonComponent, TextComponent } from 'obsidian';
+
 /**
  * A React component that renders two settings for the diagram size:
  * one for the expanded diagram and one for the collapsed diagram.
@@ -30,26 +32,74 @@ const DiagramSizes: React.FC = () => {
         plugin.settings.diagramCollapsedWidth
     );
 
-    const isDimensionInValidRange = (dimension: string) => {
-        const n = parseInt(dimension, 10);
-        return n >= 100 && n <= 1000;
+    const isDimensionInValidRange = (value: number, unit: string): boolean => {
+        if (unit === 'px') return value >= 100 && value <= 1000;
+        if (unit === '%') return value >= 10 && value <= 100;
+        return false;
     };
 
-    const isValidNumber = (dimension: string) => dimension.match(/^\d+$/);
+    const createLabeledInputWithUnit = (
+        labelText: string,
+        id: string,
+        setting: { value: number; unit: 'px' | '%' },
+        onValueChange: (newValue: number) => void,
+        onUnitChange: (newUnit: 'px' | '%') => void
+    ): HTMLDivElement => {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.gap = '4px';
 
-    const createSettingInputs = (componentType: ComponentType) => {
+        const label = document.createElement('label');
+        label.textContent = labelText;
+        container.appendChild(label);
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = id;
+        input.value = setting.value.toString();
+        input.min = setting.unit === 'px' ? '100' : '10';
+        input.max = setting.unit === 'px' ? '1000' : '100';
+        input.onchange = () => onValueChange(parseInt(input.value, 10));
+        container.appendChild(input);
+
+        const select = document.createElement('select');
+        ['px', '%'].forEach((unit) => {
+            const option = document.createElement('option');
+            option.value = unit;
+            option.text = unit;
+            if (unit === setting.unit) option.selected = true;
+            select.appendChild(option);
+        });
+        select.onchange = () => onUnitChange(select.value as 'px' | '%');
+        container.appendChild(select);
+
+        return container;
+    };
+
+    const createSettingInputs = (componentType: ComponentType): JSX.Element => {
         const prefix =
             componentType === ComponentType.Collapsed
                 ? 'Collapsed'
                 : 'Expanded';
-        const height =
-            componentType === ComponentType.Collapsed
-                ? collapsedHeight
-                : expandedHeight;
-        const width =
+
+        const widthSetting =
             componentType === ComponentType.Collapsed
                 ? collapsedWidth
                 : expandedWidth;
+        const heightSetting =
+            componentType === ComponentType.Collapsed
+                ? collapsedHeight
+                : expandedHeight;
+
+        const setWidth =
+            componentType === ComponentType.Collapsed
+                ? setCollapsedWidth
+                : setExpandedWidth;
+        const setHeight =
+            componentType === ComponentType.Collapsed
+                ? setCollapsedHeight
+                : setExpandedHeight;
 
         return (
             <>
@@ -57,7 +107,8 @@ const DiagramSizes: React.FC = () => {
                     name={`${prefix} diagram container size`}
                     addMultiDesc={(multiDesc) => {
                         multiDesc.addDescriptions([
-                            `Set the container dimensions for ${prefix.toLowerCase()} state in pixels.`,
+                            `Set the container dimensions for ${prefix.toLowerCase()} state in size.`,
+                            'Values must match unit constraints (px: 100-1000, %: 10-100).',
                             'Click Save button to apply changes.',
                         ]);
                         return multiDesc;
@@ -65,84 +116,66 @@ const DiagramSizes: React.FC = () => {
                     setHeading={true}
                     noBorder={true}
                 />
+
                 <ReactObsidianSetting
                     addTexts={[
-                        (inputHeight) => {
-                            inputHeight.setValue(height.toString());
-                            inputHeight.inputEl.id = `input${prefix.toLowerCase()}Height`;
-                            inputHeight.inputEl.type = 'number';
-                            inputHeight.inputEl.min = '100';
-                            inputHeight.inputEl.max = '1000';
-                            inputHeight.inputEl.ariaLabel = `${prefix} height in pixels`;
+                        (component): TextComponent => {
+                            const parent = component.inputEl.parentElement!;
+                            parent.innerHTML = '';
 
-                            inputHeight.inputEl.onblur = () => {
-                                if (!isValidNumber(inputHeight.inputEl.value)) {
-                                    plugin.showNotice(
-                                        'Please enter valid number'
-                                    );
-                                    return;
-                                }
+                            const row = document.createElement('div');
+                            row.style.display = 'flex';
+                            row.style.gap = '12px';
 
-                                if (
-                                    !isDimensionInValidRange(
-                                        inputHeight.inputEl.value
-                                    )
-                                ) {
-                                    plugin.showNotice(
-                                        'Invalid range. Please enter number in range 100-1000px'
-                                    );
-                                }
-                            };
-                            return inputHeight;
-                        },
-                        (inputWidth) => {
-                            inputWidth.setValue(width.toString());
-                            inputWidth.inputEl.id = `input${prefix.toLowerCase()}Width`;
-                            inputWidth.inputEl.type = 'number';
-                            inputWidth.inputEl.min = '100';
-                            inputWidth.inputEl.max = '1000';
-                            inputWidth.inputEl.ariaLabel = `${prefix} width in pixels`;
-                            inputWidth.inputEl.onblur = () => {
-                                if (!isValidNumber(inputWidth.inputEl.value)) {
-                                    plugin.showNotice(
-                                        'Please enter valid number'
-                                    );
-                                    return;
-                                }
-                                if (
-                                    !isDimensionInValidRange(
-                                        inputWidth.inputEl.value
-                                    )
-                                ) {
-                                    plugin.showNotice(
-                                        'Invalid range. Please enter number in range 100-1000px'
-                                    );
-                                }
-                            };
-                            return inputWidth;
+                            row.appendChild(
+                                createLabeledInputWithUnit(
+                                    'Width:',
+                                    `input${prefix}Width`,
+                                    widthSetting,
+                                    (value) =>
+                                        setWidth({ ...widthSetting, value }),
+                                    (unit) =>
+                                        setWidth({ ...widthSetting, unit })
+                                )
+                            );
+
+                            row.appendChild(
+                                createLabeledInputWithUnit(
+                                    'Height:',
+                                    `input${prefix}Height`,
+                                    heightSetting,
+                                    (value) =>
+                                        setHeight({ ...heightSetting, value }),
+                                    (unit) =>
+                                        setHeight({ ...heightSetting, unit })
+                                )
+                            );
+
+                            parent.appendChild(row);
+                            return component;
                         },
                     ]}
                     addButtons={[
-                        (button) => {
+                        (button): ButtonComponent => {
                             button.setIcon('save');
-                            button.onClick(async (cb) => {
-                                const inputWidth: HTMLInputElement | null =
-                                    document.querySelector(
-                                        `#input${prefix.toLowerCase()}Width`
+                            button.onClick(async () => {
+                                const widthEl =
+                                    document.querySelector<HTMLInputElement>(
+                                        `#input${prefix}Width`
                                     );
-                                const inputHeight: HTMLInputElement | null =
-                                    document.querySelector(
-                                        `#input${prefix.toLowerCase()}Height`
+                                const heightEl =
+                                    document.querySelector<HTMLInputElement>(
+                                        `#input${prefix}Height`
                                     );
 
-                                if (!inputWidth || !inputHeight) {
-                                    return;
-                                }
+                                if (!widthEl || !heightEl) return;
 
-                                if (
-                                    !isValidNumber(inputWidth.value) ||
-                                    !isValidNumber(inputHeight.value)
-                                ) {
+                                const width = parseInt(widthEl.value, 10);
+                                const height = parseInt(heightEl.value, 10);
+                                const widthUnit = widthSetting.unit;
+                                const heightUnit = heightSetting.unit;
+
+                                if (isNaN(width) || isNaN(height)) {
                                     plugin.showNotice(
                                         'Please enter valid numbers'
                                     );
@@ -150,35 +183,48 @@ const DiagramSizes: React.FC = () => {
                                 }
 
                                 if (
-                                    !isDimensionInValidRange(
-                                        inputWidth.value
-                                    ) ||
-                                    !isDimensionInValidRange(inputHeight.value)
+                                    !isDimensionInValidRange(width, widthUnit)
                                 ) {
                                     plugin.showNotice(
-                                        'Invalid range. Please enter number in range 100-1000px'
+                                        `Invalid width. ${widthUnit === 'px' ? '100–1000px' : '10–100%'} allowed.`
                                     );
                                     return;
                                 }
 
-                                const width = parseInt(inputWidth.value, 10);
-                                const height = parseInt(inputHeight.value, 10);
+                                if (
+                                    !isDimensionInValidRange(height, heightUnit)
+                                ) {
+                                    plugin.showNotice(
+                                        `Invalid height. ${heightUnit === 'px' ? '100–1000px' : '10–100%'} allowed.`
+                                    );
+                                    return;
+                                }
+
+                                const widthSettingNew = {
+                                    value: width,
+                                    unit: widthUnit,
+                                };
+                                const heightSettingNew = {
+                                    value: height,
+                                    unit: heightUnit,
+                                };
 
                                 if (componentType === ComponentType.Collapsed) {
-                                    setCollapsedWidth(width);
-                                    setCollapsedHeight(height);
-                                    plugin.settings.diagramCollapsedHeight =
-                                        height;
+                                    setCollapsedWidth(widthSettingNew);
+                                    setCollapsedHeight(heightSettingNew);
                                     plugin.settings.diagramCollapsedWidth =
-                                        width;
+                                        widthSettingNew;
+                                    plugin.settings.diagramCollapsedHeight =
+                                        heightSettingNew;
                                 } else {
-                                    setExpandedWidth(width);
-                                    setExpandedHeight(height);
-                                    plugin.settings.diagramExpandedHeight =
-                                        height;
+                                    setExpandedWidth(widthSettingNew);
+                                    setExpandedHeight(heightSettingNew);
                                     plugin.settings.diagramExpandedWidth =
-                                        width;
+                                        widthSettingNew;
+                                    plugin.settings.diagramExpandedHeight =
+                                        heightSettingNew;
                                 }
+
                                 await plugin.settingsManager.saveSettings();
                                 plugin.updateCssProperties();
                                 plugin.showNotice('Saved successfully');

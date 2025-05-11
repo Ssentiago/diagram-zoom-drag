@@ -235,22 +235,24 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {void} Void.
      */
     updateCssProperties(): void {
+        const getValue = (s: { value: number, unit: string }): string => `${s.value}${s.unit}`;
+
         document.documentElement.style.setProperty(
             '--diagram-zoom-drag-diagram-container-expanded-width',
-            `${this.settings.diagramExpandedWidth}px`
+            getValue(this.settings.diagramExpandedWidth)
         );
 
         document.documentElement.style.setProperty(
             '--diagram-zoom-drag-diagram-container-expanded-height',
-            `${this.settings.diagramExpandedHeight}px`
+            getValue(this.settings.diagramExpandedHeight)
         );
         document.documentElement.style.setProperty(
             '--diagram-zoom-drag-diagram-container-collapsed-width',
-            `${this.settings.diagramCollapsedWidth}px`
+            getValue(this.settings.diagramCollapsedWidth)
         );
         document.documentElement.style.setProperty(
             '--diagram-zoom-drag-diagram-container-collapsed-height',
-            `${this.settings.diagramCollapsedHeight}px`
+            getValue(this.settings.diagramCollapsedHeight)
         );
     }
 }
