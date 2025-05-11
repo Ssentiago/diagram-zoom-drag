@@ -60,10 +60,10 @@ export default class SettingsManager {
             collapseByDefault: false,
             automaticCollapsingOnFocusChange: false,
             hideOnMouseOutDiagram: false,
-            diagramExpandedWidth: 400,
-            diagramExpandedHeight: 400,
-            diagramCollapsedWidth: 200,
-            diagramCollapsedHeight: 200,
+            diagramExpandedWidth: { value: 400, unit: 'px' },
+            diagramExpandedHeight: { value: 400, unit: 'px' },
+            diagramCollapsedWidth: { value: 200, unit: 'px' },
+            diagramCollapsedHeight: { value: 200, unit: 'px' },
             addHidingButton: true,
         };
     }

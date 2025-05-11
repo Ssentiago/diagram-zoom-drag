@@ -25,6 +25,11 @@ export interface PanelsConfig {
     service: PanelConfig;
     move: PanelConfig;
     zoom: PanelConfig;
+};
+
+export interface SizeSetting {
+    value: number;
+    unit: 'px' | '%';
 }
 
 export interface DefaultSettings {
@@ -34,9 +39,9 @@ export interface DefaultSettings {
     collapseByDefault: boolean;
     automaticCollapsingOnFocusChange: boolean;
     hideOnMouseOutDiagram: boolean;
-    diagramExpandedHeight: number;
-    diagramExpandedWidth: number;
-    diagramCollapsedHeight: number;
-    diagramCollapsedWidth: number;
+    diagramExpandedHeight: SizeSetting;
+    diagramExpandedWidth: SizeSetting;
+    diagramCollapsedHeight: SizeSetting;
+    diagramCollapsedWidth: SizeSetting;
     addHidingButton: boolean;
 }
