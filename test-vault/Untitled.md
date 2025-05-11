@@ -1,4 +1,4 @@
-```mehrmaid
+```mermaid
 flowchart LR
 A --> C
 B --> D
