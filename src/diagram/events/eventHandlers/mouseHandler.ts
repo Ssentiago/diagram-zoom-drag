@@ -1,4 +1,6 @@
 import Events from '../events';
+import { DiagramSelectors } from '../../typing/constants';
+import { PanelsTriggering } from '../../../settings/typing/interfaces';
 
 export class MouseHandler {
     private startX!: number;
@@ -23,7 +25,7 @@ export class MouseHandler {
      */
     initialize(container: HTMLElement): void {
         const diagramElement: HTMLElement | null = container.querySelector(
-            this.diagramEvents.diagram.compoundSelector
+            DiagramSelectors.Content
         );
 
         if (!diagramElement) {
@@ -58,12 +60,12 @@ export class MouseHandler {
             'mouseup',
             this.mouseUp.bind(this, container, diagramElement)
         );
-
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseleave',
             this.mouseLeave.bind(this, container, diagramElement)
         );
+
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseenter',
@@ -227,19 +229,30 @@ export class MouseHandler {
      * @param e - The mouse event that triggered the method.
      */
     private mouseEnterOnDiagram(container: HTMLElement, e: MouseEvent): void {
-        if (!this.diagramEvents.diagram.plugin.settings.hideOnMouseOutDiagram) {
+        if (
+            !(
+                this.diagramEvents.diagram.plugin.settings.data.panels.global
+                    .triggering.mode === PanelsTriggering.HOVER
+            )
+        ) {
             return;
         }
+
         if (container.dataset.folded === 'true') {
             return;
         }
+
         const panelsData = this.diagramEvents.diagram.state.panelsData;
+        const servicePanel = this.diagramEvents.diagram.plugin.settings.data
+            .panels.global.triggering.ignoreService
+            ? []
+            : [panelsData.panels!.service.panel];
+        const panels = [
+            panelsData.panels!.move.panel,
+            panelsData.panels!.zoom.panel,
+        ].concat(servicePanel);
         if (panelsData?.panels) {
-            [
-                panelsData.panels.move.panel,
-                panelsData.panels.zoom.panel,
-                panelsData.panels.service.panel,
-            ].forEach((panel) => {
+            panels.forEach((panel) => {
                 panel.removeClass('hidden');
                 panel.addClass('visible');
             });
@@ -255,20 +268,30 @@ export class MouseHandler {
      * @param e - The mouse event that triggered the method.
      */
     private mouseLeaveOutDiagram(container: HTMLElement, e: MouseEvent): void {
-        if (!this.diagramEvents.diagram.plugin.settings.hideOnMouseOutDiagram) {
+        if (
+            !(
+                this.diagramEvents.diagram.plugin.settings.data.panels.global
+                    .triggering.mode === PanelsTriggering.HOVER
+            )
+        ) {
             return;
         }
+
         if (container.dataset.folded === 'true') {
             return;
         }
-        const panelsData = this.diagramEvents.diagram.state.panelsData;
 
+        const panelsData = this.diagramEvents.diagram.state.panelsData;
+        const servicePanel = this.diagramEvents.diagram.plugin.settings.data
+            .panels.global.triggering.ignoreService
+            ? []
+            : [panelsData.panels!.service.panel];
+        const panels = [
+            panelsData.panels!.move.panel,
+            panelsData.panels!.zoom.panel,
+        ].concat(servicePanel);
         if (panelsData?.panels) {
-            [
-                panelsData.panels.move.panel,
-                panelsData.panels.zoom.panel,
-                panelsData.panels.service.panel,
-            ].forEach((panel) => {
+            panels.forEach((panel) => {
                 panel.removeClass('visible');
                 panel.addClass('hidden');
             });

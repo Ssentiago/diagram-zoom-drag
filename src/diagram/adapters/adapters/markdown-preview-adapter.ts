@@ -8,7 +8,21 @@ export class MarkdownPreviewAdapter extends BaseAdapter {
         super(diagram);
     }
 
-    async initialize(el: HTMLElement, context?: MarkdownPostProcessorContext) {
+    /**
+     * Initializes the adapter by determining and using the appropriate diagram.
+     * If the HTML element passed is a diagram, the adapter will process it immediately.
+     * If not, the adapter will set up a MutationObserver to wait for the diagram to appear
+     * in the element (up to 5 seconds).
+     *
+     * @param el - The HTML element that represents the diagram.
+     * @param context - Optional Markdown post-processing context
+     *
+     * @returns A promise that resolves once the adapter has been successfully initialized.
+     */
+    async initialize(
+        el: HTMLElement,
+        context?: MarkdownPostProcessorContext
+    ): Promise<void> {
         if (!context) {
             return;
         }
@@ -50,20 +64,23 @@ export class MarkdownPreviewAdapter extends BaseAdapter {
 
     async processDiagram(
         diagram: {
-            diagram: DiagramData;
-            element: HTMLElement;
+            diagramData: DiagramData;
+            diagramElement: HTMLElement;
         },
         context: MarkdownPostProcessorContext
-    ) {
-        const prepared = this.prepareDiagramElement(diagram.element);
-        if (!prepared) {
+    ): Promise<void> {
+        const canContinue = this.initializationGuard(diagram.diagramElement);
+        if (!canContinue) {
             return;
         }
-        const sourceData = this.sourceExtractionWithContext(diagram.element, {
-            contextElement: diagram.element,
-            context: context,
-        });
-        const size = this.initDiagramSize(diagram.element);
+        const sourceData = this.sourceExtractionWithContext(
+            diagram.diagramElement,
+            {
+                contextElement: diagram.diagramElement,
+                context: context,
+            }
+        );
+        const size = this.getDiagramSize(diagram.diagramElement);
         if (size === undefined) {
             return;
         }

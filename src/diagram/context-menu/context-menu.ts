@@ -1,6 +1,6 @@
 import { Diagram } from '../diagram';
 import { Export } from './export/export';
-import { Menu } from 'obsidian';
+import { Menu, setTooltip } from 'obsidian';
 import { CopyDiagram } from './copy/copy-diagram';
 import { CopyDiagramSource } from './copy/copy-diagram-source';
 import { DiagramData } from '../../settings/typing/interfaces';
@@ -31,6 +31,10 @@ export class ContextMenu {
                             return;
                         }
 
+                        const isThisSvg =
+                            target.querySelector('svg') ||
+                            target.closest('svg');
+
                         isThereDiagramContainer.focus();
 
                         event.preventDefault();
@@ -38,20 +42,18 @@ export class ContextMenu {
 
                         const menu = new Menu();
                         menu.addItem((item) => {
-                            item.setTitle('Export diagram');
+                            item.setTitle('Export diagram image');
                             item.onClick(async () => {
-                                this.export.export(
-                                    this.diagram.activeContainer!
-                                );
+                                this.export.export(container);
                             });
                         });
 
                         menu.addItem((item) => {
-                            item.setTitle('Copy diagram');
+                            item.setTitle(
+                                `Copy diagram ${!isThisSvg ? 'image' : 'SVG code'}`
+                            );
                             item.onClick(async () => {
-                                await this.copy.copy(
-                                    this.diagram.activeContainer!
-                                );
+                                await this.copy.copy(container);
                             });
                         });
 

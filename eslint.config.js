@@ -36,16 +36,7 @@ export default [
             // "@typescript-eslint/no-explicit-any": "warn", // Warns about using type any
             // "@typescript-eslint/no-misused-promises": "error", // Prohibits the misuse of promises
             // "@typescript-eslint/no-non-null-assertion": "warn", // Warns about using the !
-            '@typescript-eslint/prefer-optional-chain': 'warn', // Prefers to use optional chaining
-            '@typescript-eslint/ban-types': [
-                'error',
-                {
-                    types: {
-                        Function: false, // Allows use of Function
-                    },
-                    extendDefaults: true,
-                },
-            ],
+            '@typescript-eslint/prefer-optional-chain': 'warn', // Prefers to use optional chaining,
             '@typescript-eslint/no-unnecessary-condition': 'warn', // Warns about conditions that are always true or false
             '@typescript-eslint/prefer-nullish-coalescing': 'warn', // Prefers to use the ?? operator
             '@typescript-eslint/no-floating-promises': 'error', // Requires promise processing

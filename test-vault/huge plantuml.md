@@ -26,10 +26,10 @@ rectangle System {
         globalUser --> (Delete Space)
         globalUser --> (Search Space by Link)
         (Search Space by Link) ..> (View Space) : include
-        globalUser --> (Send Application to Existing Spaces)
+        globalUser --> (Send UserGuideRoot to Existing Spaces)
         globalUser --> (View Applications to Existing Spaces)
-        globalUser --> (Modify Application to Existing Spaces)
-        globalUser --> (Delete Application to Existing Spaces)
+        globalUser --> (Modify UserGuideRoot to Existing Spaces)
+        globalUser --> (Delete UserGuideRoot to Existing Spaces)
     }
 
     package "Global Superuser Functions" {

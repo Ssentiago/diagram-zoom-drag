@@ -1,6 +1,7 @@
 import { ControlPanel } from '../control-panel';
 import { Diagram } from '../../diagram';
 import { PanelType } from '../typing/interfaces';
+import { PanelsTriggering } from '../../../settings/typing/interfaces';
 
 export class MovePanel implements PanelType {
     panel!: HTMLElement;
@@ -39,64 +40,93 @@ export class MovePanel implements PanelType {
         title: string;
         active?: boolean;
         id?: string;
+        gridArea: string;
     }> {
-        return [
+        const moveButtons =
+            this.diagram.plugin.settings.data.panels.local.panels.move.buttons;
+        const buttons = [
             {
+                key: 'upLeft',
                 icon: 'arrow-up-left',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, 50, 50, true),
                 title: 'Move up left',
+                gridArea: '1 / 1',
+                x: 50,
+                y: 50,
             },
             {
+                key: 'up',
                 icon: 'arrow-up',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, 0, 50, true),
                 title: 'Move up',
+                gridArea: '1 / 2',
+                x: 0,
+                y: 50,
             },
             {
+                key: 'upRight',
                 icon: 'arrow-up-right',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, -50, 50, true),
                 title: 'Move up right',
+                gridArea: '1 / 3',
+                x: -50,
+                y: 50,
             },
             {
+                key: 'left',
                 icon: 'arrow-left',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, 50, 0, true),
                 title: 'Move left',
+                gridArea: '2 / 1',
+                x: 50,
+                y: 0,
             },
             {
-                icon: '',
-                action: (): void => {},
-                title: '',
-                active: false,
-                id: '',
-            },
-            {
+                key: 'right',
                 icon: 'arrow-right',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, -50, 0, true),
                 title: 'Move right',
+                gridArea: '2 / 3',
+                x: -50,
+                y: 0,
             },
             {
+                key: 'downLeft',
                 icon: 'arrow-down-left',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, 50, -50, true),
                 title: 'Move down left',
+                gridArea: '3 / 1',
+                x: 50,
+                y: -50,
             },
             {
+                key: 'down',
                 icon: 'arrow-down',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, 0, -50, true),
                 title: 'Move down',
+                gridArea: '3 / 2',
+                x: 0,
+                y: -50,
             },
             {
+                key: 'downRight',
                 icon: 'arrow-down-right',
-                action: (): void =>
-                    this.diagram.actions.moveElement(container, -50, -50, true),
                 title: 'Move down right',
+                gridArea: '3 / 3',
+                x: -50,
+                y: -50,
             },
         ];
+
+        return buttons
+            .filter(
+                (config) => moveButtons[config.key as keyof typeof moveButtons]
+            )
+            .map((config) => ({
+                icon: config.icon,
+                action: () =>
+                    this.diagram.actions.moveElement(
+                        container,
+                        config.x,
+                        config.y,
+                        true
+                    ),
+                title: config.title,
+                gridArea: config.gridArea,
+            }));
     }
 
     /**
@@ -112,25 +142,31 @@ export class MovePanel implements PanelType {
         const panel = this.diagramControlPanel.createPanel(
             'diagram-move-panel',
             {
-                ...this.diagram.plugin.settings.panelsConfig.move.position,
+                ...this.diagram.plugin.settings.data.panels.local.panels.move
+                    .position,
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gridTemplateRows: 'repeat(3, 1fr)',
             }
         );
+        panel.toggleClass(
+            'hidden',
+            this.diagram.plugin.settings.data.panels.global.triggering.mode !==
+                PanelsTriggering.ALWAYS
+        );
 
         const moveButtons = this.getButtons(this.diagram.activeContainer!);
 
-        moveButtons.forEach((btn) =>
-            panel.appendChild(
-                this.diagramControlPanel.createButton(
-                    btn.icon,
-                    btn.action,
-                    btn.title,
-                    btn.active,
-                    btn.id
-                )
-            )
-        );
+        moveButtons.forEach((btn) => {
+            const button = this.diagramControlPanel.createButton(
+                btn.icon,
+                btn.action,
+                btn.title,
+                btn.active,
+                btn.id
+            );
+            button.style.gridArea = btn.gridArea;
+            panel.appendChild(button);
+        });
         return panel;
     }
 }

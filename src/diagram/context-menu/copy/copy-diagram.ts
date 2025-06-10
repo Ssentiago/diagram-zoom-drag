@@ -1,11 +1,13 @@
 import { ContextMenu } from '../context-menu';
+import { blob } from 'node:stream/consumers';
+import { DiagramSelectors } from '../../typing/constants';
 
 export class CopyDiagram {
     constructor(private readonly diagramContextMenu: ContextMenu) {}
 
     async copy(container: HTMLElement) {
         const element: HTMLElement | null = container.querySelector(
-            this.diagramContextMenu.diagram.compoundSelector
+            DiagramSelectors.Content
         );
 
         if (!element) {
@@ -43,15 +45,7 @@ export class CopyDiagram {
         try {
             svg.focus();
             const svgString = new XMLSerializer().serializeToString(svg);
-
-            const blob = new Blob([svgString], {
-                type: 'image/svg+xml',
-            });
-            await navigator.clipboard.write([
-                new ClipboardItem({
-                    'image/svg+xml': blob,
-                }),
-            ]);
+            await navigator.clipboard.writeText(svgString);
         } catch (error) {
             console.error('Failed to copy SVG:', error);
         }

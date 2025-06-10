@@ -7,25 +7,25 @@ import {
 import SettingsManager from '../settings/settings-manager';
 import { SettingsTab } from '../settings/settings-tab';
 import PluginStateChecker from './plugin-state-checker';
-
 import {
     EventObserver,
     EventPublisher,
 } from '../events-management/events-management';
-import { publishPanelsStateEvent } from '../helpers/helpers';
 import { Diagram } from '../diagram/diagram';
-import { DefaultSettings } from '../settings/typing/interfaces';
 import { PluginContext } from './plugin-context';
+import { EventID } from '../events-management/typing/constants';
+import { PanelsChangedVisibility } from '../events-management/typing/interface';
+import Logger from '../logger/logger';
 
 export default class DiagramZoomDragPlugin extends Plugin {
     context!: PluginContext;
 
-    settings!: DefaultSettings;
-    settingsManager!: SettingsManager;
+    settings!: SettingsManager;
     pluginStateChecker!: PluginStateChecker;
     publisher!: EventPublisher;
     observer!: EventObserver;
     diagram!: Diagram;
+    logger!: Logger;
 
     /**
      * Initializes the plugin.
@@ -50,8 +50,8 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns A promise that resolves when the plugin's core components have been successfully initialized.
      */
     async initializeCore(): Promise<void> {
-        this.settingsManager = new SettingsManager(this);
-        await this.settingsManager.loadSettings();
+        this.settings = new SettingsManager(this);
+        await this.settings.loadSettings();
         this.addSettingTab(new SettingsTab(this.app, this));
         this.context = new PluginContext();
     }
@@ -109,6 +109,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
     async initializeUI(): Promise<void> {
         this.diagram = new Diagram(this);
 
+        // TODO переписать, оставить только публикацию события - которое будет слушать fold-панель
         this.addCommand({
             id: 'diagram-zoom-drag-toggle-panels-management-state',
             name: 'Toggle control panel visibility of current active diagram',
@@ -117,20 +118,37 @@ export default class DiagramZoomDragPlugin extends Plugin {
                     return !!this.diagram.activeContainer;
                 }
 
-                const panels = this.diagram.panelsData.panels;
+                // this.publisher.publish({
+                //     eventID: EventID.TogglePanelsVisibility,
+                //     timestamp: new Date(),
+                //     emitter: this.app.workspace,
+                //     data: {
+                //         scope: 'all',
+                //     },
+                // })
 
-                if (!panels) {
+                const panelsData = this.diagram.panelsData.panels;
+
+                if (!panelsData) {
                     return;
                 }
-                const initialState = panels.zoom.panel.hasClass('hidden');
 
-                panels.zoom.panel.toggleClass('hidden', !initialState);
-                panels.zoom.panel.toggleClass('visible', initialState);
-                panels.move.panel.toggleClass('hidden', !initialState);
-                panels.move.panel.toggleClass('visible', initialState);
-                panels.service.panel.toggleClass('hidden', !initialState);
-                panels.service.panel.toggleClass('visible', initialState);
-                publishPanelsStateEvent(this, true);
+                const panels = Object.values(panelsData);
+                const isAnyHidden = panels.some((panel) => panel.panel.hidden);
+
+                panels.forEach((panel) => {
+                    panel.panel.toggleClass('hidden', isAnyHidden);
+                    panel.panel.toggleClass('visible', !isAnyHidden);
+                });
+
+                this.publisher.publish({
+                    eventID: EventID.PanelsChangedVisibility,
+                    timestamp: new Date(),
+                    emitter: this.app.workspace,
+                    data: {
+                        visible: true,
+                    },
+                } as PanelsChangedVisibility);
             },
         });
     }
@@ -146,6 +164,11 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     async initializeUtils(): Promise<void> {
         this.pluginStateChecker = new PluginStateChecker(this);
+        this.logger = new Logger(this);
+        await this.logger.init();
+        this.logger.info('Logger initialized');
+        debugger;
+        await this.logger.saveLogsToFile(this.logger.exportLogs());
     }
 
     /**
@@ -158,28 +181,28 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     async onload(): Promise<void> {
         await this.initializePlugin();
+        console.log('initialize');
     }
 
     /**
-     * Cleans up the plugin's event subscriptions when the plugin is unloaded.
+     * Unloads the plugin and cleans up resources.
      *
-     * This function is called automatically when the plugin is unloaded by
-     * Obsidian. It unsubscribes from all events that the plugin has subscribed
-     * to during its lifetime.
+     * This function is called automatically by Obsidian when the plugin is unloaded.
+     * It unsubscribes all event listeners and cleans up any other resources that the plugin may have allocated.
      *
-     * @returns A promise that resolves when all event subscriptions have been
-     *          successfully unsubscribed.
+     * @returns {void} Void.
      */
-    async onunload(): Promise<void> {
+    onunload(): void {
+        // TODO do not forget about observers
         this.observer.unsubscribeAll();
     }
 
     /**
-     * Initializes the plugin's features for the active view.
+     * Initializes the view's diagram data when it becomes active.
      *
-     * This function initializes the plugin's features for the active view by
-     * getting the active view, getting the view's leaf ID and content element,
-     * and initializing the plugin's features for the content element.
+     * This method gets the currently active view, and if it is a MarkdownView,
+     * it updates the context with the view and its leaf, and initializes the
+     * diagram data for the leaf.
      *
      * @returns {void} Void.
      */
@@ -196,8 +219,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
     }
 
     /**
-     * Cleans up the view's diagram data when it is no longer
-     * active.
+     * Cleans up the view when it becomes inactive.
+     *
+     * This method gets the currently active leaf, and if it is not found,
+     * it cleans up the diagram data for the leaf and resets the context.
      *
      * @returns {void} Void.
      */
@@ -223,11 +248,35 @@ export default class DiagramZoomDragPlugin extends Plugin {
         new Notice(message, duration);
     }
 
+    /**
+     * Checks if the current view is in preview mode.
+     *
+     * This getter retrieves the state of the current view and checks
+     * if the mode is set to 'preview', indicating that the view is in
+     * preview mode rather than edit or source mode.
+     *
+     * @returns {boolean} True if the current view is in preview mode, otherwise false.
+     */
     get isInPreviewMode(): boolean {
         const viewState = this.context?.view?.getState();
         return viewState?.mode === 'preview';
     }
 
+    /**
+     * Checks if the current view is in live preview mode.
+     *
+     * This getter checks two conditions to determine if the current view is in
+     * live preview mode:
+     *
+     * 1. The boolean `source` state is `false`, which means the view is not in
+     *    the standard Source mode.
+     * 2. The `mode` state is set to `'source'`, which means the view is in a
+     *    special "source" mode, which is Live Preview.
+     *
+     * If both conditions are true, then the view is in live preview mode.
+     *
+     * @returns {boolean} True if the current view is in live preview mode, otherwise false.
+     */
     get isInLivePreviewMode(): boolean {
         const viewState = this.context?.view?.getState();
         return !viewState?.source && viewState?.mode === 'source';

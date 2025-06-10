@@ -5,30 +5,19 @@ Partially replaces by Obsidian styles.
 .diagram-zoom-drag-settings {
     padding: 16px;
     overflow-y: scroll;
+    height: 100%;
+    width: 100%;
 }
 
-.diagram-zoom-drag-settings .react-obsidian-settings-item {
-    padding: 12px;
-    margin-bottom: 12px;
-    transition: box-shadow 0.3s ease;
-    border-bottom: 1px solid var(--color-base-30);
-}
 
-.diagram-zoom-drag-settings
-    .react-obsidian-settings-item
-    .setting-item
-    .button-active {
-    background-color: var(--interactive-accent);
-    color: var(--text-on-accent);
-}
+/*.diagram-zoom-drag-settings*/
+/*    .react-obsidian-settings-item*/
+/*    .setting-item*/
+/*    .button-active {*/
+/*    background-color: var(--interactive-accent);*/
+/*    color: var(--text-on-accent);*/
+/*}*/
 
-.diagram-zoom-drag-settings .react-obsidian-settings-item:last-child {
-    border-bottom: none;
-}
-
-.diagram-zoom-drag-settings .react-obsidian-settings-item.no-border {
-    border-bottom: none !important;
-}
 
 .diagram-zoom-drag-settings input[type='text'],
 .diagram-zoom-drag-settings input[type='number'] {
@@ -49,7 +38,22 @@ Partially replaces by Obsidian styles.
 }
 
 .diagram-zoom-drag-settings .invalid {
-    border: 2px solid red !important;
+    border: 2px solid #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    box-shadow: inset 0 1px 3px rgba(239, 68, 68, 0.2) !important;
+    transition: all 0.2s ease !important;
+    animation: error-pulse 0.5s ease-out !important;
+}
+
+.diagram-zoom-drag-settings .invalid:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3) !important;
+}
+
+@keyframes error-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
 
 .diagram-zoom-drag-settings .shake {
@@ -153,4 +157,8 @@ Partially replaces by Obsidian styles.
 }
 .live-preview {
     margin-top: 28px;
+}
+
+.diagram-zoom-drag-settings .invalid {
+    border: 2px solid red !important;
 }

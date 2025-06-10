@@ -1,4 +1,4 @@
-import { Events, View } from 'obsidian';
+import { EventRef, Events, View } from 'obsidian';
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
 
 import { EventID } from './typing/constants';
@@ -79,7 +79,7 @@ export class EventObserver extends Observer {
         emitter: Events,
         eventID: EventID,
         handler: (event: T) => Promise<void>
-    ): void {
+    ): EventRef {
         const eventRef = emitter.on(eventID, async (...data: unknown[]) => {
             const event = data[0] as DiagramZoomDragEvent;
             await handler(event as T);
@@ -94,6 +94,7 @@ export class EventObserver extends Observer {
             emitterSubs.set(eventID, []);
         }
         emitterSubs.get(eventID)!.push(() => emitter.offref(eventRef));
+        return eventRef;
     }
 
     /**

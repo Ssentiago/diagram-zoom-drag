@@ -5,3 +5,8 @@ export enum SupportedDiagrams {
     PlantUML = '.block-language-plantuml',
     Graphviz = '.block-language-dot',
 }
+
+export enum DiagramSelectors {
+    Container = '.diagram-container',
+    Content = '.diagram-content',
+}

@@ -1,4 +1,5 @@
 import { Diagram } from '../diagram';
+import { DiagramSelectors } from '../typing/constants';
 
 export class DiagramActions {
     constructor(public diagram: Diagram) {}
@@ -22,7 +23,7 @@ export class DiagramActions {
         this.diagram.activeContainer = container;
 
         const element: HTMLElement | null = container.querySelector(
-            this.diagram.compoundSelector
+            DiagramSelectors.Content
         );
         if (!element) {
             return;
@@ -65,7 +66,7 @@ export class DiagramActions {
     ): void {
         this.diagram.activeContainer = container;
         const element: HTMLElement | null = container.querySelector(
-            this.diagram.compoundSelector
+            DiagramSelectors.Content
         );
 
         if (!element) {
@@ -115,7 +116,7 @@ export class DiagramActions {
      */
     resetZoomAndMove(container: HTMLElement, setAnimation?: boolean): void {
         const element: HTMLElement | null = container.querySelector(
-            this.diagram.compoundSelector
+            DiagramSelectors.Content
         );
         if (element) {
             this.fitToContainer(element, container, setAnimation);

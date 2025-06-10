@@ -1,6 +1,7 @@
 import { ControlPanel } from '../control-panel';
 import { PanelType } from '../typing/interfaces';
 import { Diagram } from '../../diagram';
+import { PanelsTriggering } from '../../../settings/typing/interfaces';
 
 export class ZoomPanel implements PanelType {
     panel!: HTMLElement;
@@ -44,26 +45,36 @@ export class ZoomPanel implements PanelType {
         active?: boolean;
         id?: string;
     }> {
-        return [
-            {
+        const zoomBtn =
+            this.diagram.plugin.settings.data.panels.local.panels.zoom.buttons;
+        const buttons = [];
+
+        if (zoomBtn.in) {
+            buttons.push({
                 icon: 'zoom-in',
                 action: (): void =>
                     this.diagram.actions.zoomElement(container, 1.1, true),
                 title: 'Zoom In',
-            },
-            {
+            });
+        }
+        if (zoomBtn.reset) {
+            buttons.push({
                 icon: 'refresh-cw',
                 action: (): void =>
                     this.diagram.actions.resetZoomAndMove(container, true),
                 title: 'Reset Zoom and Position',
-            },
-            {
+            });
+        }
+        if (zoomBtn.out) {
+            buttons.push({
                 icon: 'zoom-out',
                 action: (): void =>
                     this.diagram.actions.zoomElement(container, 0.9, true),
                 title: 'Zoom Out',
-            },
-        ];
+            });
+        }
+
+        return buttons;
     }
     /**
      * Creates the HTML element of the zoom panel.
@@ -78,12 +89,17 @@ export class ZoomPanel implements PanelType {
         const zoomPanel = this.diagramControlPanel.createPanel(
             'diagram-zoom-panel',
             {
-                ...this.diagram.plugin.settings.panelsConfig.zoom.position,
+                ...this.diagram.plugin.settings.data.panels.local.panels.zoom
+                    .position,
                 transform: 'translateY(-50%)',
                 gridTemplateColumns: '1fr',
             }
         );
-
+        zoomPanel.toggleClass(
+            'hidden',
+            this.diagram.plugin.settings.data.panels.global.triggering.mode !==
+                PanelsTriggering.ALWAYS
+        );
         const zoomButtons = this.getButtons(this.diagram.activeContainer!);
         zoomButtons.forEach((btn) =>
             zoomPanel.appendChild(

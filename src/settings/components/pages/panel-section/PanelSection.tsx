@@ -1,87 +1,60 @@
-import React from 'react';
-import PanelManagement from './components/panels-management/PanelManagement';
-import PanelSettings from './components/panels-settings/PanelSettings';
-import { ReactObsidianSetting } from 'react-obsidian-setting';
-import { ButtonComponent, Platform } from 'obsidian';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { ButtonComponent } from 'obsidian';
+import React from 'react';
+import { MobileMiniNavbar } from './PanelSection.styled';
+import { ReactObsidianSetting } from 'react-obsidian-setting';
+import Settings from './settings/Settings';
+import Management from './management/Management';
 
-/**
- * `PanelSection` component renders a section with navigation and routing for panel settings and management.
- *
- * It includes two navigation buttons, "Panels Settings" and "Panels Management", which navigate to their respective routes.
- * The active button is visually distinguished based on the current route.
- * This component uses React Router's `Route` and `Routes` to render the `PanelSettings` and `PanelManagement` components
- * based on the selected route.
- *
- * @returns A React element containing the navigation and routed content for panel settings and management.
- */
 const PanelSection: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    return (
-        <div>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderBottom: '1px solid var(--color-base-30)',
-                }}
-            >
-                {Platform.isDesktopApp && (
-                    <ReactObsidianSetting
-                        addButtons={[
-                            (button): ButtonComponent => {
-                                button.setIcon('settings');
-                                button.setTooltip('Panels Settings');
-                                button.onClick(() => {
-                                    navigate('/panel-section/settings');
-                                });
-                                if (
-                                    location.pathname ===
-                                        '/panel-section/settings' ||
-                                    location.pathname === '/panel-section'
-                                ) {
-                                    button.setClass('button-active');
-                                }
-                                return button;
-                            },
+    const isSettingsActive =
+        location.pathname === '/panel-section/settings' ||
+        location.pathname === '/panel-section';
+    const isManagementActive =
+        location.pathname === '/panel-section/management';
 
-                            (button): ButtonComponent => {
-                                button.setIcon('layout-grid');
-                                button.setTooltip('Panels Management');
-                                button.onClick(() => {
-                                    navigate('/panel-section/management');
-                                });
-                                if (
-                                    location.pathname ===
-                                    '/panel-section/management'
-                                ) {
-                                    button.setClass('button-active');
-                                }
-                                return button;
-                            },
-                        ]}
-                    />
-                )}
-            </div>
+    return (
+        <>
+            <MobileMiniNavbar>
+                <ReactObsidianSetting
+                    addButtons={[
+                        (button): ButtonComponent => {
+                            button.setIcon('settings');
+                            button.setTooltip('Panels Settings');
+                            button.onClick(async () => {
+                                await navigate('/panel-section/settings');
+                            });
+                            if (isSettingsActive) {
+                                button.setClass('button-active');
+                            }
+                            return button;
+                        },
+
+                        (button): ButtonComponent => {
+                            button.setIcon('folder-plus');
+                            button.setTooltip('Panels Management');
+                            button.onClick(async () => {
+                                await navigate('/panel-section/management');
+                            });
+                            if (isManagementActive) {
+                                button.setClass('button-active');
+                            }
+                            return button;
+                        },
+                    ]}
+                />
+            </MobileMiniNavbar>
 
             <Routes>
-                <Route
-                    index
-                    element={
-                        Platform.isDesktopApp ? (
-                            <PanelSettings />
-                        ) : (
-                            <PanelManagement />
-                        )
-                    }
-                />
-                <Route path={'settings'} element={<PanelSettings />} />
-                <Route path={'management'} element={<PanelManagement />} />
+                <Route index element={<Settings />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="management" element={<Management />} />
             </Routes>
-        </div>
+        </>
     );
 };
+
 export default PanelSection;

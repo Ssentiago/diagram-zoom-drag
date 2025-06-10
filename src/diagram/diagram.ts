@@ -34,25 +34,6 @@ export class Diagram {
         this.contextMenu = new ContextMenu(this);
     }
 
-    /**
-     * Generates a compound CSS selector that matches all currently enabled diagrams.
-     *
-     * This getter constructs a comma-separated list of selectors for each diagram
-     * that is enabled in the plugin's settings. The resulting string can be used
-     * to apply styles or query all enabled diagram elements at once.
-     *
-     * @returns {string} A compound CSS selector string.
-     */
-    get compoundSelector(): string {
-        const diagrams = this.plugin.settings.supported_diagrams;
-        return diagrams.reduce<string>((acc, diagram) => {
-            if (diagram.on) {
-                return acc ? `${acc}, ${diagram.selector}` : diagram.selector;
-            }
-            return acc;
-        }, '');
-    }
-
     async initialize(
         element: HTMLElement,
         context: MarkdownPostProcessorContext
@@ -61,17 +42,17 @@ export class Diagram {
     async initialize(element: HTMLElement): Promise<void>;
 
     /**
-     * Initializes the diagram based on the provided element and context.
+     * Initializes the diagram by determining and using the appropriate adapter.
      *
-     * This method determines the rendering mode by checking the presence of a context.
-     * If a context is provided, it initializes the diagram in preview mode by invoking
-     * the `initializePreview` method. Otherwise, it initializes in live preview mode
-     * by calling `initializeLivePreview`.
+     * This function selects a suitable adapter based on the current diagram state
+     * and initializes it with the provided HTML element and optional context.
+     * The adapter is responsible for handling different rendering modes such as
+     * preview or live preview.
      *
-     * @param {HTMLElement} element - The HTML element representing the diagram container.
-     * @param {MarkdownPostProcessorContext} [context] - Optional context indicating
-     *        that rendering is in preview mode. If not provided, live preview mode is assumed.
-     * @returns {Promise<void>} A promise that resolves once initialization is complete.
+     * @param element - The HTML element that represents the diagram.
+     * @param context - Optional Markdown post-processing context
+     *
+     * @returns A promise that resolves once the adapter has been successfully initialized.
      */
     async initialize(
         element: HTMLElement,
@@ -83,31 +64,45 @@ export class Diagram {
         }
     }
 
-    updateDiagramSizeBasedOnStatus(el: HTMLElement): void {
-        const isFolded = el.dataset.folded === 'true';
+    /**
+     * Updates the size of a given diagram container.
+     *
+     * This method adjusts the dimensions of the container based on whether the diagram
+     * is folded or expanded, using settings stored in the plugin. Sizes specified in
+     * percentage units are converted to pixels based on the original size of the diagram.
+     *
+     * Additionally, if the plugin is in live preview mode, it updates the size of the
+     * closest `.live-preview-parent`, which is a `cm-view` widget for live-preview.
+     *
+     * @param container - The HTML element representing the diagram container.
+     */
+    updateDiagramSize(container: HTMLElement): void {
+        const isFolded = container.dataset.folded === 'true';
+
         const setting = isFolded
-            ? this.plugin.settings.diagramFolded
-            : this.plugin.settings.diagramExpanded;
+            ? this.plugin.settings.data.diagrams.size.folded
+            : this.plugin.settings.data.diagrams.size.expanded;
         const originalDiagramSize = this.plugin.diagram.size;
-        const heightValue = parseFloat(setting.height);
-        const widthValue = parseFloat(setting.width);
+        const heightValue = setting.height.value;
+        const widthValue = setting.width.value;
         const heightInPx =
-            setting.heightUnit === '%'
+            setting.height.unit === '%'
                 ? (heightValue / 100) * originalDiagramSize.height
                 : heightValue;
         const widthInPx =
-            setting.widthUnit === '%'
+            setting.width.unit === '%'
                 ? (widthValue / 100) * originalDiagramSize.width
                 : widthValue;
 
-        el.style.height = `${heightInPx}px`;
-        el.style.width = `${widthInPx}px`;
+        container.style.height = `${heightInPx}px`;
+        container.style.width = `${widthInPx}px`;
 
         if (this.plugin.isInLivePreviewMode) {
-            const parent = el.closest('.live-preview-parent') as HTMLElement;
+            const parent = container.closest(
+                '.live-preview-parent'
+            ) as HTMLElement;
             parent.style.setProperty('height', `${heightInPx}px`, 'important');
             parent.style.setProperty('width', `${widthInPx}px`, 'important');
-            console.log('set parent' + '');
         }
     }
 }

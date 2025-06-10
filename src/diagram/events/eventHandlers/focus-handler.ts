@@ -42,8 +42,8 @@ export class FocusHandler {
      */
     private focusIn(container: HTMLElement): void {
         if (
-            this.diagramEvents.diagram.plugin.settings
-                .automaticFoldingOnFocusChange
+            this.diagramEvents.diagram.plugin.settings.data.diagrams.folding
+                .autoFoldOnFocusChange
         ) {
             this.diagramEvents.diagram.activeContainer = container;
             this.publishFoldStateChange(container, false);
@@ -59,8 +59,8 @@ export class FocusHandler {
      */
     private focusOut(container: HTMLElement): void {
         if (
-            this.diagramEvents.diagram.plugin.settings
-                .automaticFoldingOnFocusChange
+            this.diagramEvents.diagram.plugin.settings.data.diagrams.folding
+                .autoFoldOnFocusChange
         ) {
             this.publishFoldStateChange(container, true);
         }

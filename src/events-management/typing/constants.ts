@@ -1,6 +1,4 @@
 export enum EventID {
-    PanelsChangedVisibility = 'PanelsChangedVisibility',
-    VisibilityOptionChanged = 'VisibilityOptionChanged',
-    ItemsPerPageChanged = 'ItemsPerPageChanged',
+    PanelsChangedVisibility = 'UI:Render:Diagram:PanelsVisibilityChange',
     FoldStateChanged = 'FoldStateChanged',
 }

@@ -19,5 +19,3 @@ export interface FoldStateChanged extends DiagramZoomDragEvent {
         folded: boolean;
     };
 }
-
-export interface ItemsPerPageChanged extends DiagramZoomDragEvent {}

@@ -1,26 +1,20 @@
+// About.tsx
+import { useSettingsContext } from '../../core/SettingsContext';
 import React from 'react';
-import { useSettingsContext } from '../../core/context';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
+import { FooterContent, Info, Slogan } from './About.styled';
 
-/**
- * The About component renders settings options for visiting the GitHub page and
- * providing feedback for the plugin. It also displays the current version and license
- * information.
- *
- * @returns A React fragment containing settings buttons and version information.
- */
 const About: React.FC = () => {
     const { plugin } = useSettingsContext();
-
     return (
         <>
             <ReactObsidianSetting
-                name={'Visit GitHub page of this plugin'}
+                name={'GitHub page'}
                 addButtons={[
                     (button) => {
                         button.setIcon('github');
                         button.setTooltip('Go to GitHub page of this plugin');
-                        button.onClick((cb) => {
+                        button.onClick(() => {
                             open(
                                 'https://github.com/Ssentiago/diagram-zoom-drag/'
                             );
@@ -45,35 +39,28 @@ const About: React.FC = () => {
                 ]}
             />
 
-            <div
-                style={{
-                    position: 'absolute',
-                    bottom: 10,
-                    left: '50%',
-                }}
-            >
-                <div
-                    style={{
-                        fontSize: 'small',
-                        color: 'gray',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <div>Current version: {plugin.manifest.version}</div>
-                    <div>
-                        •{' '}
-                        <a
-                            href="https://github.com/Ssentiago/diagram-zoom-drag/blob/main/LICENSE"
-                            target="_blank"
-                        >
-                            Apache-2.0 License
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <FooterContent>
+                <Slogan>Make Obsidian Diagrams Interactify!</Slogan>
+                <Info>
+                    {plugin.manifest.version}
+                    <span>•</span>
+                    <a
+                        href="https://github.com/Ssentiago/diagram-zoom-drag/blob/main/LICENSE"
+                        target="_blank"
+                    >
+                        Apache-2.0
+                    </a>
+                    <span>•</span>
+                    by{' '}
+                    <a href={'https://github.com/gitcpy'} target={'_blank'}>
+                        gitcpy
+                    </a>{' '}
+                    and{' '}
+                    <a href={'https://github.com/Ssentiago'} target={'_blank'}>
+                        Ssentiago
+                    </a>
+                </Info>
+            </FooterContent>
         </>
     );
 };

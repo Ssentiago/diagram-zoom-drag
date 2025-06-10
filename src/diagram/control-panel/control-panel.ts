@@ -3,7 +3,7 @@ import { MovePanel } from './panelType/move';
 import { ZoomPanel } from './panelType/zoom';
 import { FoldPanel } from './panelType/fold';
 import { ServicePanel } from './panelType/service';
-import { updateButton } from '../../helpers/helpers';
+import { updateButton } from './helpers/helpers';
 import { DiagramData } from '../../settings/typing/interfaces';
 
 export class ControlPanel {
@@ -41,35 +41,35 @@ export class ControlPanel {
         fold.initialize();
 
         if (
-            this.diagram.plugin.settings.panelsConfig.move.enabled &&
+            this.diagram.plugin.settings.data.panels.local.panels.move.on &&
             diagramData.panels.move.on
         ) {
             move.initialize();
         }
 
         if (
-            this.diagram.plugin.settings.panelsConfig.zoom.enabled &&
+            this.diagram.plugin.settings.data.panels.local.panels.zoom.on &&
             diagramData.panels.zoom.on
         ) {
             zoom.initialize();
         }
 
         if (
-            this.diagram.plugin.settings.panelsConfig.service.enabled &&
+            this.diagram.plugin.settings.data.panels.local.panels.service.on &&
             diagramData.panels.service.on
         ) {
             service.initialize();
         }
 
-        if (
-            this.diagram.plugin.settings.hideOnMouseOutDiagram ||
-            this.diagram.activeContainer?.dataset.folded === 'true'
-        ) {
-            [move, zoom, service].forEach((panel) => {
-                panel.panel.removeClass('visible');
-                panel.panel.addClass('hidden');
-            });
-        }
+        // if (
+        //     this.diagram.plugin.settings.data.hideOnMouseOutDiagram ||
+        //     this.diagram.activeContainer?.dataset.folded === 'true'
+        // ) {
+        //     [move, zoom, service].forEach((panel) => {
+        //         panel.panel.removeClass('visible');
+        //         panel.panel.addClass('hidden');
+        //     });
+        // }
 
         this.diagram.activeContainer?.appendChild(controlPanel);
     }

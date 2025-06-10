@@ -1,4 +1,5 @@
 import Events from '../events';
+import { DiagramSelectors } from '../../typing/constants';
 
 export class TouchHandler {
     private startX!: number;
@@ -116,7 +117,7 @@ export class TouchHandler {
         e.stopPropagation();
 
         const element: HTMLElement | null = container.querySelector(
-            this.diagramEvents.diagram.compoundSelector
+            DiagramSelectors.Content
         );
 
         if (!element) {

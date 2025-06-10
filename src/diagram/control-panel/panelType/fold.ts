@@ -1,7 +1,7 @@
 import { PanelType } from '../typing/interfaces';
 import { Diagram } from '../../diagram';
 import { ControlPanel } from '../control-panel';
-import { updateButton } from '../../../helpers/helpers';
+import { updateButton } from '../helpers/helpers';
 import { EventID } from '../../../events-management/typing/constants';
 import { FoldStateChanged } from '../../../events-management/typing/interface';
 
@@ -109,13 +109,13 @@ export class FoldPanel implements PanelType {
     toggleFoldState(container: HTMLElement): void {
         const isCurrentlyFolded = container.dataset.folded === 'true';
         container.setAttribute('data-folded', `${!isCurrentlyFolded}`);
-        this.diagram.updateDiagramSizeBasedOnStatus(container);
+        this.diagram.updateDiagramSize(container);
         this.handleFoldStateChange(container, !isCurrentlyFolded);
     }
 
     changeFoldState(container: HTMLElement, isFolded: boolean): void {
         container.setAttribute('data-folded', `${isFolded}`);
-        this.diagram.updateDiagramSizeBasedOnStatus(container);
+        this.diagram.updateDiagramSize(container);
         this.handleFoldStateChange(container, isFolded);
     }
 

@@ -8,6 +8,18 @@ export class MarkdownLivePreviewAdapter extends BaseAdapter {
         super(diagram);
     }
 
+    /**
+     * Initializes the adapter by observing the given element for any added nodes
+     * and attempt to process any diagrams that are added.
+     *
+     * This function is idempotent and will not do anything if the adapter has already
+     * been initialized.
+     *
+     * @param el - The HTML element that represents the live preview content.
+     * @param context - Optional Markdown post-processing context.
+     *
+     * @returns A promise that resolves once the adapter has been successfully initialized.
+     */
     async initialize(
         el: HTMLElement,
         context?: MarkdownPostProcessorContext
@@ -53,21 +65,38 @@ export class MarkdownLivePreviewAdapter extends BaseAdapter {
         });
     }
 
+    /**
+     * Processes a diagram by initializing it, extracting source data,
+     * determining its size, and creating a wrapper container.
+     *
+     * This method performs a sequence of operations on a diagram element:
+     * it checks initialization conditions, extracts the diagram's source
+     * data, assesses its size, and creates a wrapper container. If the
+     * diagram meets the required conditions and size is determined, it
+     * adds necessary classes for live preview and completes the post-initialization
+     * tasks.
+     *
+     * @param diagram - An object containing the diagram data and the HTML element
+     *                  of the diagram.
+     * @returns A promise that resolves when the diagram has been fully processed.
+     */
     async processDiagram(diagram: {
-        diagram: DiagramData;
-        element: HTMLElement;
-    }) {
-        const prepared = this.prepareDiagramElement(diagram.element);
-        if (!prepared) {
+        diagramData: DiagramData;
+        diagramElement: HTMLElement;
+    }): Promise<void> {
+        const canContinue = this.initializationGuard(diagram.diagramElement);
+        if (!canContinue) {
             return;
         }
-        const sourceData = this.sourceExtractionWithoutContext(diagram.element);
-        const size = this.initDiagramSize(diagram.element);
+        const sourceData = this.sourceExtractionWithoutContext(
+            diagram.diagramElement
+        );
+        const size = this.getDiagramSize(diagram.diagramElement);
         if (size === undefined) {
             return;
         }
 
-        diagram.element.parentElement?.addClass('live-preview-parent');
+        diagram.diagramElement.parentElement?.addClass('live-preview-parent');
         const container = await this.createDiagramWrapper(diagram, sourceData);
         container.addClass('live-preview');
         this.postInitDiagram(diagram, container, sourceData, size);

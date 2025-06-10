@@ -1,11 +1,12 @@
 import { App, PluginSettingTab } from 'obsidian';
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
 import { createRoot, Root } from 'react-dom/client';
-import Application from './components/Application';
+import SettingsRoot from './components/SettingsRoot';
 import React from 'react';
 
 export class SettingsTab extends PluginSettingTab {
     private root: Root | undefined = undefined;
+
     constructor(
         public app: App,
         public plugin: DiagramZoomDragPlugin
@@ -14,18 +15,9 @@ export class SettingsTab extends PluginSettingTab {
         this.containerEl.addClass('diagram-zoom-drag-settings');
     }
 
-    /**
-     * Displays the settings tab.
-     *
-     * This method creates a new root element within the container and renders
-     * the React application with the provided app and plugin properties.
-     *
-     * @returns A promise that resolves when the display is complete.
-     */
-    async display(): Promise<any> {
-        const root = this.containerEl.createDiv();
-        this.root = createRoot(root);
-        this.root.render(<Application app={this.app} plugin={this.plugin} />);
+    display(): void {
+        this.root = createRoot(this.containerEl);
+        this.root.render(<SettingsRoot app={this.app} plugin={this.plugin} />);
     }
 
     /**
@@ -34,6 +26,8 @@ export class SettingsTab extends PluginSettingTab {
      * This method unmounts the React root component and clears the container element.
      */
     hide(): void {
+        this.plugin.settings.eventBus.removeAllListeners();
+
         this.root?.unmount();
         this.containerEl.empty();
     }

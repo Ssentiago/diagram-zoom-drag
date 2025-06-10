@@ -1,10 +1,11 @@
 import { PanelType } from '../typing/interfaces';
 import { Platform, setIcon } from 'obsidian';
-import { updateButton } from '../../../helpers/helpers';
+import { updateButton } from '../helpers/helpers';
 import { Diagram } from '../../diagram';
 import { ControlPanel } from '../control-panel';
 import { EventID } from '../../../events-management/typing/constants';
 import { PanelsChangedVisibility } from '../../../events-management/typing/interface';
+import { PanelsTriggering } from '../../../settings/typing/interfaces';
 
 export class ServicePanel implements PanelType {
     panel!: HTMLElement;
@@ -51,7 +52,10 @@ export class ServicePanel implements PanelType {
         id?: string;
     }> {
         const buttons = [];
-        if (this.diagram.plugin.settings.addHidingButton) {
+        if (
+            this.diagram.plugin.settings.data.panels.local.panels.service
+                .buttons.hide
+        ) {
             buttons.push({
                 icon: this.hiding ? 'eye-off' : 'eye',
                 action: (): void => {
@@ -90,30 +94,42 @@ export class ServicePanel implements PanelType {
                 id: 'hide-show-button-diagram',
             });
         }
-        buttons.push({
-            icon: 'maximize',
-            action: async (): Promise<void> => {
-                const button: HTMLElement | null =
-                    container.querySelector('#fullscreen-button');
-                if (!button) {
-                    return;
-                }
-                if (!document.fullscreenElement) {
-                    container.addClass('is-fullscreen');
-                    await container.requestFullscreen({
-                        navigationUI: 'auto',
-                    });
-                    updateButton(button, 'minimize', 'Open in fullscreen mode');
-                } else {
-                    container.removeClass('is-fullscreen');
-                    await document.exitFullscreen();
-                    updateButton(button, 'maximize', 'Exit fullscreen mode');
-                }
-            },
-            title: 'Open in fullscreen mode',
-            id: 'fullscreen-button',
-        });
-
+        if (
+            this.diagram.plugin.settings.data.panels.local.panels.service
+                .buttons.fullscreen
+        ) {
+            buttons.push({
+                icon: 'maximize',
+                action: async (): Promise<void> => {
+                    const button: HTMLElement | null =
+                        container.querySelector('#fullscreen-button');
+                    if (!button) {
+                        return;
+                    }
+                    if (!document.fullscreenElement) {
+                        container.addClass('is-fullscreen');
+                        await container.requestFullscreen({
+                            navigationUI: 'auto',
+                        });
+                        updateButton(
+                            button,
+                            'minimize',
+                            'Open in fullscreen mode'
+                        );
+                    } else {
+                        container.removeClass('is-fullscreen');
+                        await document.exitFullscreen();
+                        updateButton(
+                            button,
+                            'maximize',
+                            'Exit fullscreen mode'
+                        );
+                    }
+                },
+                title: 'Open in fullscreen mode',
+                id: 'fullscreen-button',
+            });
+        }
         if (Platform.isMobileApp) {
             buttons.push({
                 icon: this.diagram.nativeTouchEventsEnabled
@@ -165,10 +181,19 @@ export class ServicePanel implements PanelType {
         const servicePanel = this.diagramControlPanel.createPanel(
             'diagram-service-panel',
             {
-                ...this.diagram.plugin.settings.panelsConfig.service.position,
+                ...this.diagram.plugin.settings.data.panels.local.panels.service
+                    .position,
                 gridTemplateColumns: 'repeat(auto-fit, minmax(24px, 1fr))',
                 gridAutoFlow: 'column',
             }
+        );
+        const settings = this.diagram.plugin.settings;
+
+        servicePanel.toggleClass(
+            'hidden',
+            settings.data.panels.global.triggering.mode !==
+                PanelsTriggering.ALWAYS &&
+                !settings.data.panels.global.triggering.ignoreService
         );
 
         const serviceButtons = this.getButtons(this.diagram.activeContainer!);

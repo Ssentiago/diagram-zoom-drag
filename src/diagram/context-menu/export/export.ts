@@ -1,12 +1,13 @@
 import { moment } from 'obsidian';
 import { ContextMenu } from '../context-menu';
+import { DiagramSelectors } from '../../typing/constants';
 
 export class Export {
     constructor(private diagramContextMenu: ContextMenu) {}
 
     export(container: HTMLElement): void {
         const element: HTMLElement | null = container.querySelector(
-            this.diagramContextMenu.diagram.compoundSelector
+            DiagramSelectors.Content
         );
 
         if (!element) {

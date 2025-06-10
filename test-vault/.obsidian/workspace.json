@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "4c37d555faae44cd",
+        "id": "f63e1a8e247dbd5b",
         "type": "tabs",
         "children": [
           {
-            "id": "7afec5f27d5ef8fc",
+            "id": "6622370f675ebd7b",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -74,7 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 261.5
+    "width": 257.5
   },
   "right": {
     "id": "dfece06dc10863e1",
@@ -165,21 +165,36 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "7afec5f27d5ef8fc",
+  "active": "bef88c7675a15120",
   "lastOpenFiles": [
-    "two simple mermaid and one huge.md",
-    "one huge mermaid and two mehrmaids.md",
-    "huge plantuml.md",
-    "three simple mermaids.md",
+    "home/arseny/WebstormProjects/diagram-zoom-drag/test-vault",
+    "home/arseny/WebstormProjects/diagram-zoom-drag",
+    "home/arseny/WebstormProjects",
+    "home/arseny",
+    "home",
     "simple mermaid.md",
-    "mehrmaid.md",
-    "many huge mermaids.md",
     "very huge mermaid.md",
-    "latex.md",
+    "mehrmaid.md",
     "graphviz.md",
+    "huge plantuml.md",
+    "one huge mermaid and two mehrmaids.md",
+    "many huge mermaids.md",
+    "huge plantuml.md~",
+    "latex.md",
+    "three simple mermaids.md",
+    "two simple mermaid and one huge.md",
+    "ww.md",
+    "Untitled.md",
     "Untitled 9.md",
     "Untitled 8.md",
+    "Untitled 7.md",
+    "Untitled 6.md",
     "Untitled 5.md",
+    "Untitled 4.md",
+    "Untitled 3.md",
+    "Untitled 2.md",
+    "Untitled 1.md",
+    "Test.md",
     "bear-facing-right-svgrepo-com.svg",
     "Test-2024-09-14_01-47-35.svg",
     "Untitled-2024-09-14_01-49-41.svg",
