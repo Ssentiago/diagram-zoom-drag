@@ -1,9 +1,9 @@
-import { Diagram } from '../diagram';
 import { MouseHandler } from './eventHandlers/mouseHandler';
 import { TouchHandler } from './eventHandlers/touchHandler';
 import { KeyboardHandler } from './eventHandlers/keyboardHandler';
 import { FocusHandler } from './eventHandlers/focus-handler';
 import { DiagramData } from '../../settings/typing/interfaces';
+import Diagram from '../diagram';
 
 export default class Events {
     private readonly mouse: MouseHandler;
@@ -29,10 +29,10 @@ export default class Events {
      * observers to.
      * @param diagramData
      */
-    initialize(container: HTMLElement, diagramData: DiagramData): void {
-        this.mouse.initialize(container);
-        this.touch.initialize(container);
-        this.keyboard.initialize(container);
-        this.focus.initialize(container);
+    initialize(): void {
+        this.mouse.initialize();
+        this.touch.initialize();
+        this.keyboard.initialize();
+        this.focus.initialize();
     }
 }

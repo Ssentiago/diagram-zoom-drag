@@ -1,6 +1,7 @@
 import Events from '../events';
-import { DiagramSelectors } from '../../typing/constants';
+import { DiagramSelectors } from '../../../old_diagram/typing/constants';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
+import { TriggerType } from '../../control-panel/control-panel';
 
 export class MouseHandler {
     private startX!: number;
@@ -9,7 +10,7 @@ export class MouseHandler {
     private initialY!: number;
     private isDragging = false;
 
-    constructor(private readonly diagramEvents: Events) {}
+    constructor(private readonly events: Events) {}
 
     /**
      * Adds mouse event listeners to the given container element.
@@ -23,7 +24,8 @@ export class MouseHandler {
      *
      * @param container - The container element to add the mouse event listeners to.
      */
-    initialize(container: HTMLElement): void {
+    initialize(): void {
+        const { container } = this.events.diagram;
         const diagramElement: HTMLElement | null = container.querySelector(
             DiagramSelectors.Content
         );
@@ -32,49 +34,49 @@ export class MouseHandler {
             return;
         }
 
-        if (!this.diagramEvents.diagram.plugin.context.view) {
+        if (!this.events.diagram.plugin.context.view) {
             return;
         }
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'wheel',
             this.wheel.bind(this, container, diagramElement),
             { passive: true }
         );
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mousedown',
             this.mouseDown.bind(this, container, diagramElement)
         );
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mousemove',
             this.mouseMove.bind(this, container, diagramElement)
         );
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseup',
             this.mouseUp.bind(this, container, diagramElement)
         );
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseleave',
             this.mouseLeave.bind(this, container, diagramElement)
         );
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseenter',
-            this.mouseEnterOnDiagram.bind(this, container)
+            this.mouseEnterOnDiagram.bind(this)
         );
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseleave',
-            this.mouseLeaveOutDiagram.bind(this, container)
+            this.mouseLeaveOutDiagram.bind(this)
         );
     }
 
@@ -99,26 +101,22 @@ export class MouseHandler {
             return;
         }
 
-        this.diagramEvents.diagram.activeContainer = container;
         const rect = diagramElement.getBoundingClientRect();
         const offsetX = event.clientX - rect.left;
         const offsetY = event.clientY - rect.top;
 
-        const prevScale = this.diagramEvents.diagram.scale;
-        this.diagramEvents.diagram.scale += event.deltaY * -0.001;
-        this.diagramEvents.diagram.scale = Math.max(
-            0.125,
-            this.diagramEvents.diagram.scale
-        );
+        const prevScale = this.events.diagram.scale;
+        this.events.diagram.scale += event.deltaY * -0.001;
+        this.events.diagram.scale = Math.max(0.125, this.events.diagram.scale);
 
-        const dx = offsetX * (1 - this.diagramEvents.diagram.scale / prevScale);
-        const dy = offsetY * (1 - this.diagramEvents.diagram.scale / prevScale);
+        const dx = offsetX * (1 - this.events.diagram.scale / prevScale);
+        const dy = offsetY * (1 - this.events.diagram.scale / prevScale);
 
-        this.diagramEvents.diagram.dx += dx;
-        this.diagramEvents.diagram.dy += dy;
+        this.events.diagram.dx += dx;
+        this.events.diagram.dy += dy;
 
         diagramElement.setCssStyles({
-            transform: `translate(${this.diagramEvents.diagram.dx}px, ${this.diagramEvents.diagram.dy}px) scale(${this.diagramEvents.diagram.scale})`,
+            transform: `translate(${this.events.diagram.dx}px, ${this.events.diagram.dy}px) scale(${this.events.diagram.scale})`,
         });
     }
 
@@ -140,14 +138,13 @@ export class MouseHandler {
             return;
         }
 
-        this.diagramEvents.diagram.activeContainer = container;
         container.focus({ preventScroll: true });
         this.isDragging = true;
         this.startX = event.clientX;
         this.startY = event.clientY;
 
-        this.initialX = this.diagramEvents.diagram.dx;
-        this.initialY = this.diagramEvents.diagram.dy;
+        this.initialX = this.events.diagram.dx;
+        this.initialY = this.events.diagram.dy;
         diagramElement.setCssStyles({
             cursor: 'grabbing',
         });
@@ -172,14 +169,13 @@ export class MouseHandler {
         if (!this.isDragging) {
             return;
         }
-        this.diagramEvents.diagram.activeContainer = container;
 
         const dx = event.clientX - this.startX;
         const dy = event.clientY - this.startY;
-        this.diagramEvents.diagram.dx = this.initialX + dx;
-        this.diagramEvents.diagram.dy = this.initialY + dy;
+        this.events.diagram.dx = this.initialX + dx;
+        this.events.diagram.dy = this.initialY + dy;
         diagramElement.setCssStyles({
-            transform: `translate(${this.diagramEvents.diagram.dx}px, ${this.diagramEvents.diagram.dy}px) scale(${this.diagramEvents.diagram.scale})`,
+            transform: `translate(${this.events.diagram.dx}px, ${this.events.diagram.dy}px) scale(${this.events.diagram.scale})`,
         });
     }
 
@@ -197,7 +193,6 @@ export class MouseHandler {
         diagramElement: HTMLElement,
         event: MouseEvent
     ): void {
-        this.diagramEvents.diagram.activeContainer = container;
         this.isDragging = false;
         diagramElement.setCssStyles({ cursor: 'grab' });
     }
@@ -220,81 +215,12 @@ export class MouseHandler {
         this.mouseUp(container, diagramElement, event);
     }
 
-    /**
-     * Handles the mouse enter event for the diagram element when the setting is enabled.
-     * If container is in a 'folded' state, this method does nothing.
-     * This method shows all panels-management in the diagram when the mouse enters the diagram element.
-     *
-     * @param container - The container element where the event occurred.
-     * @param e - The mouse event that triggered the method.
-     */
-    private mouseEnterOnDiagram(container: HTMLElement, e: MouseEvent): void {
-        if (
-            !(
-                this.diagramEvents.diagram.plugin.settings.data.panels.global
-                    .triggering.mode === PanelsTriggering.HOVER
-            )
-        ) {
-            return;
-        }
-
-        if (container.dataset.folded === 'true') {
-            return;
-        }
-
-        const panelsData = this.diagramEvents.diagram.state.panelsData;
-        const servicePanel = this.diagramEvents.diagram.plugin.settings.data
-            .panels.global.triggering.ignoreService
-            ? []
-            : [panelsData.panels!.service.panel];
-        const panels = [
-            panelsData.panels!.move.panel,
-            panelsData.panels!.zoom.panel,
-        ].concat(servicePanel);
-        if (panelsData?.panels) {
-            panels.forEach((panel) => {
-                panel.removeClass('hidden');
-                panel.addClass('visible');
-            });
-        }
+    private mouseEnterOnDiagram(e: MouseEvent): void {
+        const controlPanel = this.events.diagram.controlPanel;
+        controlPanel.show(TriggerType.MOUSE);
     }
 
-    /**
-     * Handles the mouse leave event for the diagram element when the setting is enabled.
-     * If container is in a 'folded' state, this method does nothing.
-     * This method hides all panels-management in the diagram when the mouse leaves the diagram element.
-     *
-     * @param container - The container element where the event occurred.
-     * @param e - The mouse event that triggered the method.
-     */
-    private mouseLeaveOutDiagram(container: HTMLElement, e: MouseEvent): void {
-        if (
-            !(
-                this.diagramEvents.diagram.plugin.settings.data.panels.global
-                    .triggering.mode === PanelsTriggering.HOVER
-            )
-        ) {
-            return;
-        }
-
-        if (container.dataset.folded === 'true') {
-            return;
-        }
-
-        const panelsData = this.diagramEvents.diagram.state.panelsData;
-        const servicePanel = this.diagramEvents.diagram.plugin.settings.data
-            .panels.global.triggering.ignoreService
-            ? []
-            : [panelsData.panels!.service.panel];
-        const panels = [
-            panelsData.panels!.move.panel,
-            panelsData.panels!.zoom.panel,
-        ].concat(servicePanel);
-        if (panelsData?.panels) {
-            panels.forEach((panel) => {
-                panel.removeClass('visible');
-                panel.addClass('hidden');
-            });
-        }
+    private mouseLeaveOutDiagram(e: MouseEvent): void {
+        this.events.diagram.controlPanel.hide(TriggerType.MOUSE);
     }
 }

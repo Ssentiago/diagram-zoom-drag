@@ -1,22 +1,34 @@
 import { ControlPanel } from '../control-panel';
-import { Diagram } from '../../diagram';
-import { PanelType } from '../typing/interfaces';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
+import { BasePanel } from './base-panel';
 
-export class MovePanel implements PanelType {
-    panel!: HTMLElement;
-    constructor(
-        private readonly diagram: Diagram,
-        private readonly diagramControlPanel: ControlPanel
-    ) {}
+export class MovePanel extends BasePanel {
+    constructor(controlPanel: ControlPanel) {
+        super(controlPanel);
+    }
 
-    /**
-     * Initializes the move panel.
-     *
-     * This method creates the HTML element of the move panel and assigns it to the `panel` property.
-     */
     initialize(): void {
         this.panel = this.createPanel();
+    }
+
+    get enabled(): boolean {
+        return (
+            this.diagram.plugin.settings.data.panels.local.panels.move.on &&
+            this.diagram.diagramData.panels.move.on
+        );
+    }
+
+    get cssClass() {
+        return 'diagram-move-panel';
+    }
+
+    get cssStyles() {
+        return {
+            ...this.diagram.plugin.settings.data.panels.local.panels.move
+                .position,
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateRows: 'repeat(3, 1fr)',
+        };
     }
 
     /**
@@ -34,7 +46,7 @@ export class MovePanel implements PanelType {
      * @param container The container to which the move panel is attached.
      * @returns An array of objects representing the buttons in the move panel.
      */
-    getButtons(container: HTMLElement): Array<{
+    getButtons(): Array<{
         icon: string;
         action: () => void;
         title: string;
@@ -118,12 +130,7 @@ export class MovePanel implements PanelType {
             .map((config) => ({
                 icon: config.icon,
                 action: () =>
-                    this.diagram.actions.moveElement(
-                        container,
-                        config.x,
-                        config.y,
-                        true
-                    ),
+                    this.diagram.actions.moveElement(config.x, config.y, true),
                 title: config.title,
                 gridArea: config.gridArea,
             }));
@@ -139,25 +146,17 @@ export class MovePanel implements PanelType {
      * @returns The HTML element of the move panel.
      */
     createPanel(): HTMLElement {
-        const panel = this.diagramControlPanel.createPanel(
-            'diagram-move-panel',
-            {
-                ...this.diagram.plugin.settings.data.panels.local.panels.move
-                    .position,
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gridTemplateRows: 'repeat(3, 1fr)',
-            }
-        );
+        const panel = this.createPanelElement();
         panel.toggleClass(
             'hidden',
             this.diagram.plugin.settings.data.panels.global.triggering.mode !==
                 PanelsTriggering.ALWAYS
         );
 
-        const moveButtons = this.getButtons(this.diagram.activeContainer!);
+        const moveButtons = this.getButtons();
 
         moveButtons.forEach((btn) => {
-            const button = this.diagramControlPanel.createButton(
+            const button = this.createButton(
                 btn.icon,
                 btn.action,
                 btn.title,

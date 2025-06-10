@@ -12,15 +12,15 @@ export class KeyboardHandler {
      *
      * @param container - The container element to add the keydown event listener to.
      */
-    initialize(container: HTMLElement): void {
+    initialize(): void {
         if (!this.diagramEvents.diagram.plugin.context.view) {
             return;
         }
 
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
-            container,
+            this.diagramEvents.diagram.container,
             'keydown',
-            this.keyDown.bind(this, container)
+            this.keyDown.bind(this)
         );
     }
 
@@ -31,7 +31,7 @@ export class KeyboardHandler {
      * @param container - The container element where the key event occurred.
      * @param event - The keyboard event that triggered the function.
      */
-    keyDown(container: HTMLElement, event: KeyboardEvent): void {
+    keyDown(event: KeyboardEvent): void {
         const key = event.code;
         const KEYS = [
             'ArrowUp',
@@ -47,64 +47,32 @@ export class KeyboardHandler {
         }
         event.preventDefault();
         event.stopPropagation();
-        this.diagramEvents.diagram.activeContainer = container;
 
         switch (key) {
             case 'ArrowUp':
-                this.diagramEvents.diagram.actions.moveElement(
-                    container,
-                    0,
-                    50,
-                    true
-                );
+                this.diagramEvents.diagram.actions.moveElement(0, 50, true);
                 break;
             case 'ArrowDown':
-                this.diagramEvents.diagram.actions.moveElement(
-                    container,
-                    0,
-                    -50,
-                    true
-                );
+                this.diagramEvents.diagram.actions.moveElement(0, -50, true);
                 break;
             case 'ArrowLeft':
-                this.diagramEvents.diagram.actions.moveElement(
-                    container,
-                    50,
-                    0,
-                    true
-                );
+                this.diagramEvents.diagram.actions.moveElement(50, 0, true);
                 break;
             case 'ArrowRight':
-                this.diagramEvents.diagram.actions.moveElement(
-                    container,
-                    -50,
-                    0,
-                    true
-                );
+                this.diagramEvents.diagram.actions.moveElement(-50, 0, true);
                 break;
         }
 
         if (event.ctrlKey) {
             switch (key) {
                 case 'Equal':
-                    this.diagramEvents.diagram.actions.zoomElement(
-                        container,
-                        1.1,
-                        true
-                    );
+                    this.diagramEvents.diagram.actions.zoomElement(1.1, true);
                     break;
                 case 'Minus':
-                    this.diagramEvents.diagram.actions.zoomElement(
-                        container,
-                        0.9,
-                        true
-                    );
+                    this.diagramEvents.diagram.actions.zoomElement(0.9, true);
                     break;
                 case 'Digit0':
-                    this.diagramEvents.diagram.actions.resetZoomAndMove(
-                        container,
-                        true
-                    );
+                    this.diagramEvents.diagram.actions.resetZoomAndMove(true);
                     break;
             }
         }

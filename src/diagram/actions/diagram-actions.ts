@@ -1,5 +1,5 @@
-import { Diagram } from '../diagram';
-import { DiagramSelectors } from '../typing/constants';
+import Diagram from '../diagram';
+import { DiagramSelectors } from '../../old_diagram/typing/constants';
 
 export class DiagramActions {
     constructor(public diagram: Diagram) {}
@@ -14,17 +14,9 @@ export class DiagramActions {
      * @param dy - The vertical distance to move the element.
      * @param setAnimation - Whether to animate the movement of the element. Defaults to undefined.
      */
-    moveElement(
-        container: HTMLElement,
-        dx: number,
-        dy: number,
-        setAnimation?: boolean
-    ): void {
-        this.diagram.activeContainer = container;
-
-        const element: HTMLElement | null = container.querySelector(
-            DiagramSelectors.Content
-        );
+    moveElement(dx: number, dy: number, setAnimation?: boolean): void {
+        const element: HTMLElement | null =
+            this.diagram.container.querySelector(DiagramSelectors.Content);
         if (!element) {
             return;
         }
@@ -59,21 +51,15 @@ export class DiagramActions {
      * @param factor - The zoom factor. For example, 1.5 means 150% scale.
      * @param setAnimation - Whether to animate the zooming of the element. Defaults to undefined.
      */
-    zoomElement(
-        container: HTMLElement,
-        factor: number,
-        setAnimation?: boolean
-    ): void {
-        this.diagram.activeContainer = container;
-        const element: HTMLElement | null = container.querySelector(
-            DiagramSelectors.Content
-        );
+    zoomElement(factor: number, setAnimation?: boolean): void {
+        const element: HTMLElement | null =
+            this.diagram.container.querySelector(DiagramSelectors.Content);
 
         if (!element) {
             return;
         }
 
-        const containerRect = container.getBoundingClientRect();
+        const containerRect = this.diagram.container.getBoundingClientRect();
 
         const centerX = containerRect.width / 2;
         const centerY = containerRect.height / 2;
@@ -114,12 +100,11 @@ export class DiagramActions {
      * @param container - The container element that contains the diagram element.
      * @param setAnimation - Whether to animate the reset of the element. Defaults to undefined.
      */
-    resetZoomAndMove(container: HTMLElement, setAnimation?: boolean): void {
-        const element: HTMLElement | null = container.querySelector(
-            DiagramSelectors.Content
-        );
+    resetZoomAndMove(setAnimation?: boolean): void {
+        const element: HTMLElement | null =
+            this.diagram.container.querySelector(DiagramSelectors.Content);
         if (element) {
-            this.fitToContainer(element, container, setAnimation);
+            this.fitToContainer(element, this.diagram.container, setAnimation);
         }
     }
 
@@ -135,7 +120,6 @@ export class DiagramActions {
         container: HTMLElement,
         setAnimation?: boolean
     ): void {
-        this.diagram.activeContainer = container;
         const containerWidth = container.clientWidth;
         const containerHeight = container.clientHeight;
         const diagramWidth = element.clientWidth;

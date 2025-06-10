@@ -1,6 +1,6 @@
 import { moment } from 'obsidian';
 import { ContextMenu } from '../context-menu';
-import { DiagramSelectors } from '../../typing/constants';
+import { DiagramSelectors } from '../../../old_diagram/typing/constants';
 
 export class Export {
     constructor(private diagramContextMenu: ContextMenu) {}

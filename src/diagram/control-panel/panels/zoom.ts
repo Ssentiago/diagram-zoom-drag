@@ -1,15 +1,11 @@
 import { ControlPanel } from '../control-panel';
-import { PanelType } from '../typing/interfaces';
-import { Diagram } from '../../diagram';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
+import { BasePanel } from './base-panel';
 
-export class ZoomPanel implements PanelType {
-    panel!: HTMLElement;
-
-    constructor(
-        private readonly diagram: Diagram,
-        private readonly diagramControlPanel: ControlPanel
-    ) {}
+export class ZoomPanel extends BasePanel {
+    constructor(controlPanel: ControlPanel) {
+        super(controlPanel);
+    }
 
     /**
      * Initializes the zoom panel.
@@ -18,6 +14,25 @@ export class ZoomPanel implements PanelType {
      */
     initialize(): void {
         this.panel = this.createPanel();
+    }
+
+    get enabled(): boolean {
+        return (
+            this.controlPanel.diagram.plugin.settings.data.panels.local.panels
+                .zoom.on && this.controlPanel.diagram.diagramData.panels.zoom.on
+        );
+    }
+
+    get cssClass() {
+        return 'diagram-zoom-panel';
+    }
+    get cssStyles() {
+        return {
+            ...this.controlPanel.diagram.plugin.settings.data.panels.local
+                .panels.zoom.position,
+            transform: 'translateY(-50%)',
+            gridTemplateColumns: '1fr',
+        };
     }
 
     /**
@@ -38,7 +53,7 @@ export class ZoomPanel implements PanelType {
      * @param container The container to which the zoom panel is attached.
      * @returns An array of objects representing the buttons in the zoom panel.
      */
-    getButtons(container: HTMLElement): Array<{
+    getButtons(): Array<{
         icon: string;
         action: () => void;
         title: string;
@@ -46,14 +61,15 @@ export class ZoomPanel implements PanelType {
         id?: string;
     }> {
         const zoomBtn =
-            this.diagram.plugin.settings.data.panels.local.panels.zoom.buttons;
+            this.controlPanel.diagram.plugin.settings.data.panels.local.panels
+                .zoom.buttons;
         const buttons = [];
 
         if (zoomBtn.in) {
             buttons.push({
                 icon: 'zoom-in',
                 action: (): void =>
-                    this.diagram.actions.zoomElement(container, 1.1, true),
+                    this.controlPanel.diagram.actions.zoomElement(1.1, true),
                 title: 'Zoom In',
             });
         }
@@ -61,7 +77,7 @@ export class ZoomPanel implements PanelType {
             buttons.push({
                 icon: 'refresh-cw',
                 action: (): void =>
-                    this.diagram.actions.resetZoomAndMove(container, true),
+                    this.controlPanel.diagram.actions.resetZoomAndMove(true),
                 title: 'Reset Zoom and Position',
             });
         }
@@ -69,7 +85,7 @@ export class ZoomPanel implements PanelType {
             buttons.push({
                 icon: 'zoom-out',
                 action: (): void =>
-                    this.diagram.actions.zoomElement(container, 0.9, true),
+                    this.controlPanel.diagram.actions.zoomElement(0.9, true),
                 title: 'Zoom Out',
             });
         }
@@ -86,29 +102,16 @@ export class ZoomPanel implements PanelType {
      * @returns The HTML element of the zoom panel.
      */
     createPanel(): HTMLElement {
-        const zoomPanel = this.diagramControlPanel.createPanel(
-            'diagram-zoom-panel',
-            {
-                ...this.diagram.plugin.settings.data.panels.local.panels.zoom
-                    .position,
-                transform: 'translateY(-50%)',
-                gridTemplateColumns: '1fr',
-            }
-        );
+        const zoomPanel = this.createPanelElement();
         zoomPanel.toggleClass(
             'hidden',
-            this.diagram.plugin.settings.data.panels.global.triggering.mode !==
-                PanelsTriggering.ALWAYS
+            this.controlPanel.diagram.plugin.settings.data.panels.global
+                .triggering.mode !== PanelsTriggering.ALWAYS
         );
-        const zoomButtons = this.getButtons(this.diagram.activeContainer!);
+        const zoomButtons = this.getButtons();
         zoomButtons.forEach((btn) =>
             zoomPanel.appendChild(
-                this.diagramControlPanel.createButton(
-                    btn.icon,
-                    btn.action,
-                    btn.title,
-                    true
-                )
+                this.createButton(btn.icon, btn.action, btn.title, true)
             )
         );
 

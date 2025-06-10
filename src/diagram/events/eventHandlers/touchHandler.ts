@@ -1,5 +1,5 @@
 import Events from '../events';
-import { DiagramSelectors } from '../../typing/constants';
+import { DiagramSelectors } from '../../../old_diagram/typing/constants';
 
 export class TouchHandler {
     private startX!: number;
@@ -19,7 +19,8 @@ export class TouchHandler {
      *
      * @param container - The container element to add the touch event listeners to.
      */
-    initialize(container: HTMLElement): void {
+    initialize(): void {
+        const container = this.diagramEvents.diagram.container;
         if (!this.diagramEvents.diagram.plugin.context.view) {
             return;
         }
@@ -66,8 +67,6 @@ export class TouchHandler {
             return;
         }
 
-        this.diagramEvents.diagram.activeContainer = container;
-
         const target = e.target as HTMLElement;
 
         // we got touch to a button panel - returning
@@ -111,7 +110,6 @@ export class TouchHandler {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
-        this.diagramEvents.diagram.activeContainer = container;
 
         e.preventDefault();
         e.stopPropagation();
@@ -128,7 +126,7 @@ export class TouchHandler {
             const dx = e.touches[0].clientX - this.startX;
             const dy = e.touches[0].clientY - this.startY;
 
-            this.diagramEvents.diagram.actions.moveElement(container, dx, dy);
+            this.diagramEvents.diagram.actions.moveElement(dx, dy);
 
             this.startX = e.touches[0].clientX;
             this.startY = e.touches[0].clientY;
@@ -136,7 +134,7 @@ export class TouchHandler {
             const currentDistance = this.calculateDistance(e.touches);
             const factor = currentDistance / this.initialDistance;
 
-            this.diagramEvents.diagram.actions.zoomElement(container, factor);
+            this.diagramEvents.diagram.actions.zoomElement(factor);
 
             this.initialDistance = currentDistance;
         }
@@ -159,8 +157,6 @@ export class TouchHandler {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
-
-        this.diagramEvents.diagram.activeContainer = container;
 
         const target = e.target as HTMLElement;
 

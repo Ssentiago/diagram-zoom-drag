@@ -1,6 +1,6 @@
-import { Diagram } from '../diagram';
+import { Diagram } from '../../old_diagram/diagram';
 import { Export } from './export/export';
-import { Menu, setTooltip } from 'obsidian';
+import { Menu } from 'obsidian';
 import { CopyDiagram } from './copy/copy-diagram';
 import { CopyDiagramSource } from './copy/copy-diagram-source';
 import { DiagramData } from '../../settings/typing/interfaces';

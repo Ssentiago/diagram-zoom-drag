@@ -1,6 +1,6 @@
 import { ContextMenu } from '../context-menu';
 import { blob } from 'node:stream/consumers';
-import { DiagramSelectors } from '../../typing/constants';
+import { DiagramSelectors } from '../../../old_diagram/typing/constants';
 
 export class CopyDiagram {
     constructor(private readonly diagramContextMenu: ContextMenu) {}
