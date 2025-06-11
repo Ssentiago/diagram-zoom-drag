@@ -19,7 +19,8 @@ export default class Logger {
     }
 
     async init() {
-        await this.writeSystemInfo();
+        this.plugin.settings.data.debug.enabled &&
+            (await this.writeSystemInfo());
     }
 
     async saveLogsToFile(content: string): Promise<void> {
@@ -183,6 +184,9 @@ export default class Logger {
     }
 
     private log(level: string, message: string): void {
+        if (!this.plugin.settings.data.debug.enabled) {
+            return;
+        }
         const logEntry = {
             timestamp: new Date().toISOString(),
             level: level,
