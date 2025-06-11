@@ -5,15 +5,18 @@ import { ServicePanel } from './panels/service';
 import Diagram from 'diagram/diagram';
 import { IControlPanel } from './typing/interfaces';
 import { TriggerType } from '../typing/constants';
+import { Component } from 'obsidian';
 
-export class ControlPanel implements IControlPanel {
+export class ControlPanel extends Component {
     fold!: FoldPanel;
     move!: MovePanel;
     zoom!: ZoomPanel;
     service!: ServicePanel;
     controlPanel!: HTMLElement;
 
-    constructor(public diagram: Diagram) {}
+    constructor(public diagram: Diagram) {
+        super();
+    }
 
     initialize(): void {
         this.createControlPanel();
@@ -63,5 +66,9 @@ export class ControlPanel implements IControlPanel {
         return [this.move, this.zoom, this.service, this.fold].some((panel) =>
             panel.isVisible()
         );
+    }
+
+    cleanUp() {
+        this.unload();
     }
 }

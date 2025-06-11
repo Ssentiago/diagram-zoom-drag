@@ -15,8 +15,8 @@ import { PluginContext } from './plugin-context';
 import Logger from '../logger/logger';
 import Diagram from 'diagram/diagram';
 import State, { LeafID } from './state';
-import { MarkdownLivePreviewAdapter } from '../adapters/adapters/markdown-live-preview-adapter';
-import { MarkdownPreviewAdapter } from '../adapters/adapters/markdown-preview-adapter';
+import { MarkdownLivePreviewAdapter } from '../adapters/markdown-live-preview-adapter';
+import { MarkdownPreviewAdapter } from '../adapters/markdown-preview-adapter';
 import EventEmitter2 from 'eventemitter2';
 import { TriggerType } from '../diagram/typing/constants';
 
@@ -220,7 +220,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {void} Void.
      */
     onunload(): void {
-        // TODO do not forget about observers
+        this.state.clear();
         this.observer.unsubscribeAll();
     }
 

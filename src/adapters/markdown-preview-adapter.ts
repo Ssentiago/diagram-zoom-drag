@@ -1,9 +1,9 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
-import { BaseAdapter, ContextData } from '../base-adapter';
-import { DiagramData } from '../../settings/typing/interfaces';
-import DiagramZoomDragPlugin from '../../core/diagram-zoom-drag-plugin';
-import { LeafID } from '../../core/state';
-import { FileStats } from '../../diagram/diagram';
+import { BaseAdapter, ContextData } from './base-adapter';
+import { DiagramData } from '../settings/typing/interfaces';
+import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
+import { LeafID } from '../core/state';
+import { FileStats } from '../diagram/diagram';
 
 export interface BaseDiagramDescriptor {
     diagramData: DiagramData;

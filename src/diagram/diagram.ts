@@ -1,11 +1,9 @@
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
 import { DiagramActions } from './actions/diagram-actions';
-import { DiagramData, Diagrams } from '../settings/typing/interfaces';
 import { ControlPanel } from './control-panel/control-panel';
-import { BaseDiagramDescriptor } from '../adapters/adapters/markdown-preview-adapter';
+import { BaseDiagramDescriptor } from '../adapters/markdown-preview-adapter';
 import { DiagramSize, SourceData } from '../adapters/base-adapter';
 import Events from './events/events';
-import { ContextMenu } from './events/handlers/context-menu/context-menu';
 import { updateDiagramSize } from './helpers';
 
 export interface FileStats {
@@ -65,6 +63,7 @@ export default class Diagram {
         );
     }
 
-    // not done yet...
-    cleanUp() {}
+    cleanUp() {
+        [this.events, this.controlPanel].forEach((obj) => obj.cleanUp());
+    }
 }

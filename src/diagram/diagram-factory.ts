@@ -1,6 +1,6 @@
 import Diagram, { DiagramDescriptor, FileStats } from './diagram';
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
-import { BaseDiagramDescriptor } from '../adapters/adapters/markdown-preview-adapter';
+import { BaseDiagramDescriptor } from '../adapters/markdown-preview-adapter';
 import { DiagramSize, SourceData } from '../adapters/base-adapter';
 
 export default class DiagramFactory {

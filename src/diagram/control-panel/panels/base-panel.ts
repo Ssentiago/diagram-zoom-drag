@@ -4,11 +4,14 @@ import { TriggerType } from '../../typing/constants';
 import { ServicePanel } from './service';
 import { hide } from 'concurrently/dist/src/defaults';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
+import { Component } from 'obsidian';
 
-export abstract class BasePanel {
+export abstract class BasePanel extends Component {
     protected panel!: HTMLElement;
 
-    constructor(protected controlPanel: IControlPanel) {}
+    constructor(protected controlPanel: IControlPanel) {
+        super();
+    }
 
     abstract get enabled(): boolean;
     protected abstract setupPanelContents(): void;
@@ -64,31 +67,19 @@ export abstract class BasePanel {
 
             updateButton(button, icon, title);
 
-            this.controlPanel.diagram.plugin.context.view!.registerDomEvent(
-                button,
-                'click',
-                action
-            );
+            this.registerDomEvent(button, 'click', action);
 
-            this.controlPanel.diagram.plugin.context.view!.registerDomEvent(
-                button,
-                'mouseenter',
-                () => {
-                    button.setCssStyles({
-                        color: 'var(--interactive-accent)',
-                    });
-                }
-            );
+            this.registerDomEvent(button, 'mouseenter', () => {
+                button.setCssStyles({
+                    color: 'var(--interactive-accent)',
+                });
+            });
 
-            this.controlPanel.diagram.plugin.context.view!.registerDomEvent(
-                button,
-                'mouseleave',
-                () => {
-                    button.setCssStyles({
-                        color: 'var(--text-muted)',
-                    });
-                }
-            );
+            this.registerDomEvent(button, 'mouseleave', () => {
+                button.setCssStyles({
+                    color: 'var(--text-muted)',
+                });
+            });
         } else {
             button.setCssStyles({
                 visibility: 'hidden',

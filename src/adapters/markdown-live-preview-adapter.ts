@@ -1,9 +1,9 @@
-import { BaseAdapter } from '../base-adapter';
+import { BaseAdapter } from './base-adapter';
 import { MarkdownPostProcessorContext } from 'obsidian';
-import DiagramZoomDragPlugin from '../../core/diagram-zoom-drag-plugin';
-import { LeafID } from '../../core/state';
+import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
+import { LeafID } from '../core/state';
 import { BaseDiagramDescriptor } from './markdown-preview-adapter';
-import { FileStats } from '../../diagram/diagram';
+import { FileStats } from '../diagram/diagram';
 
 export class MarkdownLivePreviewAdapter extends BaseAdapter {
     constructor(plugin: DiagramZoomDragPlugin, fileStats: FileStats) {

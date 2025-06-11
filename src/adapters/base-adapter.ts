@@ -5,7 +5,7 @@ import { HTMLElementWithCMView } from './typing/interfaces';
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
 import DiagramFactory from '../diagram/diagram-factory';
 import { LeafID } from '../core/state';
-import { BaseDiagramDescriptor } from './adapters/markdown-preview-adapter';
+import { BaseDiagramDescriptor } from './markdown-preview-adapter';
 import Diagram, { FileStats } from '../diagram/diagram';
 
 export type ContainerID = string & { __brand: 'diagram_ID' };
