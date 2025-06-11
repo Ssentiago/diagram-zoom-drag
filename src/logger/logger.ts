@@ -1,6 +1,5 @@
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
-import { normalizePath, Platform } from 'obsidian';
-import { Simulate } from 'react-dom/test-utils';
+import { moment, normalizePath, Platform } from 'obsidian';
 
 interface ObsidianAppExtend {
     plugins: {
@@ -9,8 +8,8 @@ interface ObsidianAppExtend {
 }
 
 export default class Logger {
-    private maxEntries = 2000;
-    private storageKey: string;
+    private readonly maxEntries = 2000;
+    private readonly storageKey: string;
     private isStorageAvailable = true;
 
     constructor(public plugin: DiagramZoomDragPlugin) {
@@ -18,40 +17,63 @@ export default class Logger {
         this.checkStorageAvailability();
     }
 
+    /**
+     * Initializes the logger by writing system information if the debug setting is enabled.
+     */
     async init() {
         this.plugin.settings.data.debug.enabled &&
             (await this.writeSystemInfo());
     }
 
+    /**
+     * Saves log content to a file in the plugin's log directory.
+     *
+     * This function ensures that the logs directory exists within the plugin directory,
+     * creates it if necessary, and then writes the provided log content to a JSON file
+     * named with the current timestamp. After saving the logs, it rotates old log files
+     * to maintain a clean log directory.
+     *
+     * @param content The log content to save.
+     * @throws An error if the plugin directory is not found or if there is an issue writing the logs.
+     */
     async saveLogsToFile(content: string): Promise<void> {
         try {
-            const logsDir = '.obsidian/plugins/Diagram Zoom Drag/logs';
-
-            if (!(await this.plugin.app.vault.adapter.exists(logsDir))) {
-                await this.plugin.app.vault.adapter.mkdir(logsDir);
+            const pluginDir = this.plugin.manifest.dir;
+            if (pluginDir) {
+                throw new Error(
+                    `DiagramZoomDrag: It was not possible to get the way to the plugin. Path:${pluginDir}`
+                );
             }
+            const logsDir = normalizePath(`${pluginDir}/logs`);
+            const exists = await this.plugin.app.vault.adapter.exists(logsDir);
+            exists && (await this.plugin.app.vault.adapter.mkdir(logsDir));
 
-            const now = new Date();
-            const filename = `logs-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}.json`;
-            const filepath = `${logsDir}/${filename}`;
+            const now = moment().format('YYYY-MM-DD HH:mm:ss');
+            const filename = `logs-${now}.json`;
+            const filepath = normalizePath(`${logsDir}/${filename}`);
 
             await this.plugin.app.vault.adapter.write(filepath, content);
 
             await this.rotateLogFiles(logsDir);
 
-            console.log(`Logger: Логи сохранены в ${filepath}`);
+            console.log(`DiagramZoomDrag: Logs are saved in${filepath}`);
         } catch (error) {
-            console.error('Logger: Ошибка записи в файл:', error);
+            console.error('DiagramZoomDrag: Error in the file:', error);
         }
     }
+
     /**
-     * Удалить старые лог-файлы
+     * Rotates log files in the specified directory.
+     * @param logsDir The directory in which log files are stored.
+     * @returns A promise that resolves when the log files have been rotated.
+     *
+     * This function removes any log files that are older than 7 days.
      */
     private async rotateLogFiles(logsDir: string): Promise<void> {
         try {
             const files = await this.plugin.app.vault.adapter.list(logsDir);
-            const now = Date.now();
-            const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 дней
+            const now = moment().unix() * 1000;
+            const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
 
             for (const file of files.files) {
                 if (!file.endsWith('.json')) {
@@ -63,20 +85,47 @@ export default class Logger {
 
                 if (stat && now - stat.mtime > maxAge) {
                     await this.plugin.app.vault.adapter.remove(filePath);
-                    console.log(`Logger: Удален старый лог-файл ${file}`);
+                    console.log(
+                        `DiagramZoomDrag: Remove the old log-file${file}`
+                    );
                 }
             }
         } catch (error) {
-            console.error('Logger: Ошибка ротации логов:', error);
+            console.error('DiagramZoomDrag: Log Rotation Error:', error);
         }
     }
 
+    /**
+     * Returns the version of Obsidian as a string, or 'unknown' if it cannot be determined.
+     *
+     * The version is extracted from the title of the current page, which is assumed to contain
+     * the string "Obsidian vX.Y.Z" where X.Y.Z is the version number.
+     * @returns The version of Obsidian as a string, or 'unknown' if it cannot be determined.
+     */
     getObsidianVersion(): string {
         const title = document.title;
         const match = title.match(/Obsidian v([\d.]+)/);
         return match ? match[1] : 'unknown';
     }
 
+    /**
+     * Collects and writes comprehensive system information for logging purposes.
+     * The information includes details about the current session, Obsidian environment,
+     * system specifications, plugin metadata, performance metrics, and storage usage.
+     * This data is structured into a systemInfo object and added to the logs.
+     *
+     * The system information gathered includes:
+     * - Timestamp of the log entry.
+     * - Obsidian version, document title, enabled plugins count and list, vault name,
+     *   and platform details (mobile or desktop).
+     * - System details such as platform information, user agent, language, screen resolution,
+     *   viewport size, timezone, online status, CPU cores, device memory, and connection type.
+     * - Plugin details including name, version, minimum app version, id, author, and description.
+     * - Performance metrics like memory usage, memory total, memory limit, and page load time.
+     * - Local storage usage details.
+     *
+     * This function does not return any value but logs the gathered system information.
+     */
     private async writeSystemInfo(): Promise<void> {
         const systemInfo = {
             timestamp: new Date().toISOString(),
@@ -133,19 +182,39 @@ export default class Logger {
         this.addLogEntry(systemInfo);
     }
 
+    /**
+     * Get the platform information.
+     *
+     * This function uses the `userAgentData` API if available, otherwise it falls back to the
+     * `navigator.platform` property. If both of them are not available, it returns 'unknown'.
+     *
+     * @returns {string} The platform name, or 'unknown' if it cannot be determined.
+     */
     private getPlatformInfo(): string {
         if ('userAgentData' in navigator) {
             const uaData = (navigator as any).userAgentData;
-            return uaData.platform || 'unknown';
+            return uaData.platform ?? 'unknown';
         }
 
-        return navigator.platform || 'unknown';
+        return navigator.platform ?? 'unknown';
     }
 
+    /**
+     * Calculate the current usage of local storage by logs.
+     *
+     * This function retrieves the logs from local storage using the defined storage key
+     * and calculates their memory usage in kilobytes. If no logs are found, it returns '0 B'.
+     * In case of an error during retrieval, it returns 'unknown'.
+     *
+     * @returns {string} The size of the logs in local storage formatted as a string in KB,
+     * or '0 B' if no logs are stored, or 'unknown' if an error occurs.
+     */
     getStorageUsage(): string {
         try {
             const logs = localStorage.getItem(this.storageKey);
-            if (!logs) return '0 B';
+            if (!logs) {
+                return '0 B';
+            }
 
             const bytes = logs.length + this.storageKey.length;
             return `${(bytes / 1024).toFixed(2)} KB`;
@@ -153,6 +222,12 @@ export default class Logger {
             return 'unknown';
         }
     }
+    /**
+     * Check if local storage is available.
+     *
+     * This function checks if local storage is available by attempting to set and remove an item.
+     * If the operation fails, `isStorageAvailable` is set to `false` and a warning is logged.
+     */
     private checkStorageAvailability(): void {
         try {
             localStorage.setItem('test', 'test');
@@ -163,6 +238,13 @@ export default class Logger {
         }
     }
 
+    /**
+     * Add a log entry to the log storage.
+     *
+     * If the log storage is not available, the log entry is discarded.
+     *
+     * @param {any} logEntry The log entry to add.
+     */
     private addLogEntry(logEntry: any): void {
         if (!this.isStorageAvailable) {
             return;
@@ -183,6 +265,26 @@ export default class Logger {
         }
     }
 
+    /**
+     * Returns all stored logs as an array of objects.
+     *
+     * The array is empty if no logs are available.
+     *
+     * @returns {any[]} An array of log objects, or an empty array if no logs are available.
+     */
+    getAllLogs(): any[] {
+        const stored = localStorage.getItem(this.storageKey);
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    /**
+     * Logs a message with the specified level.
+     *
+     * If the `debug.enabled` setting is `false`, the message is discarded.
+     *
+     * @param {string} level - The severity level of the message (e.g., 'debug', 'info', 'warn', 'error').
+     * @param {string} message - The message to log.
+     */
     private log(level: string, message: string): void {
         if (!this.plugin.settings.data.debug.enabled) {
             return;
@@ -197,41 +299,16 @@ export default class Logger {
     }
 
     /**
-     * Получить все логи из localStorage
+     * Determines if a message should be logged based on its level.
+     *
+     * This function compares the provided message level with the current
+     * logging level set in the plugin's settings. It returns `true` if
+     * the message level is equal to or more severe than the current logging
+     * level, allowing the message to be logged.
+     *
+     * @param messageLevel - The severity level of the message (e.g., 'debug', 'info', 'warn', 'error').
+     * @returns `true` if the message should be logged, `false` otherwise.
      */
-    getAllLogs(): any[] {
-        const stored = localStorage.getItem(this.storageKey);
-        return stored ? JSON.parse(stored) : [];
-    }
-
-    /**
-     * Получить логи за текущую дату
-     */
-    getTodayLogs(): any[] {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        return this.getAllLogs().filter((log) =>
-            log.timestamp?.startsWith(today)
-        );
-    }
-
-    /**
-     * Очистить все логи
-     */
-    clearAllLogs(): void {
-        localStorage.removeItem(this.storageKey);
-    }
-
-    /**
-     * Очистить логи за сегодня
-     */
-    clearTodayLogs(): void {
-        const today = new Date().toISOString().split('T')[0];
-        const logs = this.getAllLogs().filter(
-            (log) => !log.timestamp?.startsWith(today)
-        );
-        localStorage.setItem(this.storageKey, JSON.stringify(logs));
-    }
-
     private shouldLog(messageLevel: string): boolean {
         const levels = ['debug', 'info', 'warn', 'error'];
         const currentLevel = this.plugin.settings.data.debug.level;
@@ -242,6 +319,11 @@ export default class Logger {
         return messageLevelIndex >= currentLevelIndex;
     }
 
+    /**
+     * Logs a debug message.
+     *
+     * @param message The debug message to log.
+     */
     debug(message: string): void {
         if (!this.shouldLog('debug')) {
             return;
@@ -256,6 +338,11 @@ export default class Logger {
         this.log('INFO', message);
     }
 
+    /**
+     * Logs a warning message.
+     *
+     * @param message The warning message to log.
+     */
     warn(message: string): void {
         if (!this.shouldLog('warn')) {
             return;
@@ -263,6 +350,11 @@ export default class Logger {
         this.log('WARNING', message);
     }
 
+    /**
+     * Log an error message to the console and save the full log to a file.
+     *
+     * @param message The error message to log.
+     */
     error(message: string): void {
         if (!this.shouldLog('error')) {
             return;
@@ -272,6 +364,19 @@ export default class Logger {
         this.saveLogsToFile(this.exportLogs()).catch(console.error);
     }
 
+    /**
+     * Exports all stored logs as a formatted string.
+     *
+     * The exported string includes both system information logs
+     * and regular logs. System information logs are identified
+     * by the presence of a `session_start` property and are
+     * displayed under the "=== SYSTEM INFO ===" section.
+     * Regular logs are displayed under the "=== LOGS ===" section,
+     * each prefixed by a timestamp and log level.
+     *
+     * @returns A formatted string containing system information
+     * and regular logs. Returns an empty string if no logs are available.
+     */
     exportLogs(): string {
         const logs = this.getAllLogs();
         if (logs.length === 0) {
@@ -296,5 +401,17 @@ export default class Logger {
         });
 
         return result;
+    }
+
+    /**
+     * Clears all stored logs from local storage.
+     *
+     * This function removes the log entries associated with the
+     * current storage key from the local storage. It effectively
+     * deletes all logs that have been stored, resetting the log
+     * storage to an empty state.
+     */
+    clearAllLogs(): void {
+        localStorage.removeItem(this.storageKey);
     }
 }
