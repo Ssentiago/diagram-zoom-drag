@@ -1,5 +1,5 @@
 import Diagram from '../diagram';
-import { DiagramSelectors } from '../../old_diagram/typing/constants';
+import { DiagramSelectors } from '../typing/constants';
 
 export class DiagramActions {
     constructor(public diagram: Diagram) {}

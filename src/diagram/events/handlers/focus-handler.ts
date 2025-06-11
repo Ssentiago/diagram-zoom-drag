@@ -1,9 +1,9 @@
-import Events from '../events';
+import Events, { Handler } from '../events';
 import { FoldStateChanged } from '../../../events-management/typing/interface';
 import { EventID } from '../../../events-management/typing/constants';
 import { TriggerType } from '../../control-panel/control-panel';
 
-export class FocusHandler {
+export class FocusHandler implements Handler {
     constructor(private readonly events: Events) {}
 
     /**
@@ -53,5 +53,16 @@ export class FocusHandler {
             this.events.diagram.controlPanel.fold.fold();
         }
         this.events.diagram.controlPanel.hide(TriggerType.FOCUS);
+    }
+
+    cleanUp() {
+        this.events.diagram.container.removeEventListener(
+            'focusin',
+            this.focusIn
+        );
+        this.events.diagram.container.removeEventListener(
+            'focusout',
+            this.focusOut
+        );
     }
 }

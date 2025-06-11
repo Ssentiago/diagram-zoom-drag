@@ -1,24 +1,70 @@
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
 import { DiagramActions } from './actions/diagram-actions';
-import { DiagramData } from '../settings/typing/interfaces';
+import { DiagramData, Diagrams } from '../settings/typing/interfaces';
 import { ControlPanel } from './control-panel/control-panel';
+import { BaseDiagramDescriptor } from '../adapters/adapters/markdown-preview-adapter';
+import { DiagramSize, SourceData } from '../adapters/base-adapter';
+import Events from './events/events';
+import { ContextMenu } from './events/handlers/context-menu/context-menu';
+import { updateDiagramSize } from './helpers';
+
+export interface FileStats {
+    ctime: number;
+    mtime: number;
+    size: number;
+}
+
+export interface DiagramDescriptor extends BaseDiagramDescriptor {
+    sourceData: SourceData;
+    size: DiagramSize;
+}
 
 export default class Diagram {
-    actions: DiagramActions;
-    controlPanel: ControlPanel;
-
+    container: HTMLElement;
+    id!: string;
     dx = 0;
     dy = 0;
     scale = 1;
     nativeTouchEventsEnabled!: boolean;
-    diagramData!: DiagramData;
+    diagramDescriptor: DiagramDescriptor;
+    fileStats: FileStats;
+
+    actions: DiagramActions;
+    controlPanel: ControlPanel;
+    events: Events;
 
     constructor(
         public plugin: DiagramZoomDragPlugin,
-        public container: HTMLElement,
-        data: DiagramData
+        container: HTMLElement,
+        diagramDescriptor: DiagramDescriptor,
+        fileStats: FileStats
     ) {
+        this.container = container;
+        this.diagramDescriptor = diagramDescriptor;
+        this.fileStats = fileStats;
+
         this.actions = new DiagramActions(this);
         this.controlPanel = new ControlPanel(this);
+        this.events = new Events(this);
     }
+
+    initialize() {
+        this.controlPanel.initialize();
+        this.events.initialize();
+
+        updateDiagramSize(
+            this.container,
+            this.diagramDescriptor.size,
+            this.plugin.settings.data.diagrams.size,
+            this.plugin.isInLivePreviewMode
+        );
+
+        this.actions.fitToContainer(
+            this.diagramDescriptor.diagramElement,
+            this.container
+        );
+    }
+
+    // not done yet...
+    cleanUp() {}
 }

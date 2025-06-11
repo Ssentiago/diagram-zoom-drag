@@ -1,6 +1,6 @@
-import Events from '../events';
+import Events, { Handler } from '../events';
 
-export class KeyboardHandler {
+export class KeyboardHandler implements Handler {
     constructor(private readonly diagramEvents: Events) {}
 
     /**
@@ -76,5 +76,12 @@ export class KeyboardHandler {
                     break;
             }
         }
+    }
+
+    cleanUp() {
+        this.diagramEvents.diagram.container.removeEventListener(
+            'keydown',
+            this.keyDown
+        );
     }
 }

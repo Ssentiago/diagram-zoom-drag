@@ -1,11 +1,13 @@
 import { ContextMenu } from '../context-menu';
 import { blob } from 'node:stream/consumers';
-import { DiagramSelectors } from '../../../old_diagram/typing/constants';
+import { DiagramSelectors } from '../../../../typing/constants';
 
 export class CopyDiagram {
-    constructor(private readonly diagramContextMenu: ContextMenu) {}
+    constructor(private readonly contextMenu: ContextMenu) {}
 
-    async copy(container: HTMLElement) {
+    async copy() {
+        const { plugin } = this.contextMenu.events.diagram;
+        const container = this.contextMenu.events.diagram.container;
         const element: HTMLElement | null = container.querySelector(
             DiagramSelectors.Content
         );
@@ -19,10 +21,10 @@ export class CopyDiagram {
 
         if (svg) {
             await this.copySvg(svg);
-            this.diagramContextMenu.diagram.plugin.showNotice('Copied');
+            plugin.showNotice('Copied');
         } else if (img) {
             await this.copyImg(img);
-            this.diagramContextMenu.diagram.plugin.showNotice('Copied');
+            plugin.showNotice('Copied');
         } else {
             console.error('Neither SVG nor IMG element found in the container');
         }

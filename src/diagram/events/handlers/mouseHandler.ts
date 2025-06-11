@@ -1,9 +1,9 @@
-import Events from '../events';
-import { DiagramSelectors } from '../../../old_diagram/typing/constants';
+import Events, { Handler } from '../events';
+import { DiagramSelectors } from '../../typing/constants';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { TriggerType } from '../../control-panel/control-panel';
 
-export class MouseHandler {
+export class MouseHandler implements Handler {
     private startX!: number;
     private startY!: number;
     private initialX!: number;
@@ -41,43 +41,50 @@ export class MouseHandler {
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'wheel',
-            this.wheel.bind(this, container, diagramElement),
+            this.wheel,
             { passive: true }
         );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mousedown',
-            this.mouseDown.bind(this, container, diagramElement)
+            this.mouseDown
         );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mousemove',
-            this.mouseMove.bind(this, container, diagramElement)
+            this.mouseMove
         );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseup',
-            this.mouseUp.bind(this, container, diagramElement)
+            this.mouseUp
         );
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseleave',
-            this.mouseLeave.bind(this, container, diagramElement)
+            this.mouseLeave
         );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseenter',
-            this.mouseEnterOnDiagram.bind(this)
+            this.mouseEnterOnDiagram
         );
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'mouseleave',
-            this.mouseLeaveOutDiagram.bind(this)
+            this.mouseLeaveOutDiagram
         );
+    }
+
+    get elements() {
+        const container = this.events.diagram.container;
+        const diagramElement =
+            this.events.diagram.diagramDescriptor.diagramElement;
+        return { container, diagramElement };
     }
 
     /**
@@ -92,14 +99,14 @@ export class MouseHandler {
      * @param diagramElement - The diagram element.
      * @param event - The wheel event.
      */
-    private wheel(
-        container: HTMLElement,
-        diagramElement: HTMLElement,
-        event: WheelEvent
-    ): void {
-        if (!event.ctrlKey && document.fullscreenElement !== container) {
+    private wheel(event: WheelEvent): void {
+        if (
+            !event.ctrlKey &&
+            document.fullscreenElement !== this.events.diagram.container
+        ) {
             return;
         }
+        const { container, diagramElement } = this.elements;
 
         const rect = diagramElement.getBoundingClientRect();
         const offsetX = event.clientX - rect.left;
@@ -129,14 +136,11 @@ export class MouseHandler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the function.
      */
-    private mouseDown(
-        container: HTMLElement,
-        diagramElement: HTMLElement,
-        event: MouseEvent
-    ): void {
+    private mouseDown(event: MouseEvent): void {
         if (event.button !== 0) {
             return;
         }
+        const { container, diagramElement } = this.elements;
 
         container.focus({ preventScroll: true });
         this.isDragging = true;
@@ -161,14 +165,11 @@ export class MouseHandler {
      * @param diagramElement - The diagram element that is being moved.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseMove(
-        container: HTMLElement,
-        diagramElement: HTMLElement,
-        event: MouseEvent
-    ): void {
+    private mouseMove(event: MouseEvent): void {
         if (!this.isDragging) {
             return;
         }
+        const { container, diagramElement } = this.elements;
 
         const dx = event.clientX - this.startX;
         const dy = event.clientY - this.startY;
@@ -188,11 +189,9 @@ export class MouseHandler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseUp(
-        container: HTMLElement,
-        diagramElement: HTMLElement,
-        event: MouseEvent
-    ): void {
+    private mouseUp(event: MouseEvent): void {
+        const { container, diagramElement } = this.elements;
+
         this.isDragging = false;
         diagramElement.setCssStyles({ cursor: 'grab' });
     }
@@ -207,20 +206,41 @@ export class MouseHandler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseLeave(
-        container: HTMLElement,
-        diagramElement: HTMLElement,
-        event: MouseEvent
-    ): void {
-        this.mouseUp(container, diagramElement, event);
+    private mouseLeave(event: MouseEvent): void {
+        this.mouseUp(event);
     }
 
     private mouseEnterOnDiagram(e: MouseEvent): void {
-        const controlPanel = this.events.diagram.controlPanel;
-        controlPanel.show(TriggerType.MOUSE);
+        this.events.diagram.controlPanel.show(TriggerType.MOUSE);
     }
 
-    private mouseLeaveOutDiagram(e: MouseEvent): void {
-        this.events.diagram.controlPanel.hide(TriggerType.MOUSE);
+    private mouseLeaveOutDiagram(e: MouseEvent): void {}
+
+    cleanUp() {
+        this.events.diagram.container.removeEventListener('wheel', this.wheel);
+        this.events.diagram.container.removeEventListener(
+            'mousedown',
+            this.mouseDown
+        );
+        this.events.diagram.container.removeEventListener(
+            'mousemove',
+            this.mouseMove
+        );
+        this.events.diagram.container.removeEventListener(
+            'mouseup',
+            this.mouseUp
+        );
+        this.events.diagram.container.removeEventListener(
+            'mouseleave',
+            this.mouseLeave
+        );
+        this.events.diagram.container.removeEventListener(
+            'mouseenter',
+            this.mouseEnterOnDiagram
+        );
+        this.events.diagram.container.removeEventListener(
+            'mouseleave',
+            this.mouseLeaveOutDiagram
+        );
     }
 }

@@ -151,12 +151,16 @@ export abstract class BasePanel {
     }
 
     protected get supportedTriggers(): number {
-        return (
-            TriggerType.FOCUS |
-            TriggerType.KEYPRESS |
-            TriggerType.FORCE |
-            TriggerType.FOLD |
-            TriggerType.MOUSE
-        );
+        let base = TriggerType.FORCE | TriggerType.FOLD;
+        if (
+            this.diagram.plugin.settings.data.panels.global.triggering.mode ===
+            'hover'
+        ) {
+            base = base | TriggerType.MOUSE;
+        }
+
+        // in that way we can add support to mouse (focus) triggering. or for keypress
+
+        return base;
     }
 }

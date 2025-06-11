@@ -1,7 +1,7 @@
-import Events from '../events';
-import { DiagramSelectors } from '../../../old_diagram/typing/constants';
+import Events, { Handler } from '../events';
+import { DiagramSelectors } from '../../typing/constants';
 
-export class TouchHandler {
+export class TouchHandler implements Handler {
     private startX!: number;
     private startY!: number;
     private initialDistance!: number;
@@ -28,19 +28,19 @@ export class TouchHandler {
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
             container,
             'touchstart',
-            this.touchStart.bind(this, container),
+            this.touchStart,
             { passive: false }
         );
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
             container,
             'touchmove',
-            this.touchMove.bind(this, container),
+            this.touchMove,
             { passive: false }
         );
         this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
             container,
             'touchend',
-            this.touchEnd.bind(this, container),
+            this.touchEnd,
             { passive: false }
         );
     }
@@ -62,10 +62,11 @@ export class TouchHandler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchStart(container: HTMLElement, e: TouchEvent): void {
+    private touchStart(e: TouchEvent): void {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
+        const container = this.diagramEvents.diagram.container;
 
         const target = e.target as HTMLElement;
 
@@ -106,10 +107,11 @@ export class TouchHandler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchMove(container: HTMLElement, e: TouchEvent): void {
+    private touchMove(e: TouchEvent): void {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
+        const container = this.diagramEvents.diagram.container;
 
         e.preventDefault();
         e.stopPropagation();
@@ -153,10 +155,11 @@ export class TouchHandler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchEnd(container: HTMLElement, e: TouchEvent): void {
+    private touchEnd(e: TouchEvent): void {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
+        const container = this.diagramEvents.diagram.container;
 
         const target = e.target as HTMLElement;
 
@@ -183,5 +186,20 @@ export class TouchHandler {
         const dx = touch2.clientX - touch1.clientX;
         const dy = touch2.clientY - touch1.clientY;
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    cleanUp() {
+        this.diagramEvents.diagram.container.removeEventListener(
+            'touchstart',
+            this.touchStart
+        );
+        this.diagramEvents.diagram.container.removeEventListener(
+            'touchmove',
+            this.touchMove
+        );
+        this.diagramEvents.diagram.container.removeEventListener(
+            'touchend',
+            this.touchEnd
+        );
     }
 }

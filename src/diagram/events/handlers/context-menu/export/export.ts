@@ -1,11 +1,12 @@
 import { moment } from 'obsidian';
 import { ContextMenu } from '../context-menu';
-import { DiagramSelectors } from '../../../old_diagram/typing/constants';
+import { DiagramSelectors } from '../../../../typing/constants';
 
 export class Export {
-    constructor(private diagramContextMenu: ContextMenu) {}
+    constructor(private contextMenu: ContextMenu) {}
 
-    export(container: HTMLElement): void {
+    export(): void {
+        const container = this.contextMenu.events.diagram.container;
         const element: HTMLElement | null = container.querySelector(
             DiagramSelectors.Content
         );
@@ -22,7 +23,7 @@ export class Export {
         } else if (img) {
             this.exportIMG(img);
         } else {
-            this.diagramContextMenu.diagram.plugin.showNotice(
+            this.contextMenu.events.diagram.plugin.showNotice(
                 "Oops! We couldn't find any elements to export. " +
                     'It seems something is wrong with this diagram?.'
             );
@@ -44,7 +45,7 @@ export class Export {
                 this.downloadFile(blob, `png`);
             })
             .catch((error) => {
-                this.diagramContextMenu.diagram.plugin.showNotice(
+                this.contextMenu.events.diagram.plugin.showNotice(
                     'Error exporting image'
                 );
                 console.error('Error exporting image:', error);
@@ -52,8 +53,8 @@ export class Export {
     }
 
     private downloadFile(blob: Blob, extension: string): void {
-        const { diagram } = this.diagramContextMenu;
-        const filename = `dzg_export_${diagram.plugin.context.view?.file?.basename ?? 'diagram'}_${diagram.activeContainer?.id ?? 'unknown'}}_${moment().format('YYYYMMDDHHmmss')}.${extension}`;
+        const { diagram } = this.contextMenu.events;
+        const filename = `dzg_export_${diagram.plugin.context.view?.file?.basename ?? 'diagram'}}_${moment().format('YYYYMMDDHHmmss')}.${extension}`;
         const url = URL.createObjectURL(blob);
         const downloadLink = document.createElement('a');
         downloadLink.href = url;

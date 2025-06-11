@@ -1,0 +1,81 @@
+import { Export } from './export/export';
+import { Menu } from 'obsidian';
+import { CopyDiagram } from './copy/copy-diagram';
+import { CopyDiagramSource } from './copy/copy-diagram-source';
+import { DiagramData } from '../../../../settings/typing/interfaces';
+import Diagram from '../../../diagram';
+import Events, { Handler } from '../../events';
+
+export class ContextMenu implements Handler {
+    private export: Export;
+    private copy: CopyDiagram;
+    private copySource: CopyDiagramSource;
+    constructor(public readonly events: Events) {
+        this.export = new Export(this);
+        this.copy = new CopyDiagram(this);
+        this.copySource = new CopyDiagramSource(this);
+    }
+
+    initialize(): void {
+        const container = this.events.diagram.container;
+        this.events.diagram.plugin.context.view?.registerDomEvent(
+            container,
+            'contextmenu',
+            () => {
+                container.addEventListener(
+                    'contextmenu',
+                    this.handleContextMenu,
+                    true
+                );
+            }
+        );
+    }
+
+    handleContextMenu(event: MouseEvent) {
+        const target = event.target as HTMLElement;
+        const isThereDiagramContainer: HTMLElement | null =
+            target.closest('.diagram-container');
+
+        if (!isThereDiagramContainer) {
+            return;
+        }
+
+        const isThisSvg = target.querySelector('svg') || target.closest('svg');
+
+        isThereDiagramContainer.focus();
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const menu = new Menu();
+        menu.addItem((item) => {
+            item.setTitle('Export diagram image');
+            item.onClick(async () => {
+                this.export.export();
+            });
+        });
+
+        menu.addItem((item) => {
+            item.setTitle(`Copy diagram ${!isThisSvg ? 'image' : 'SVG code'}`);
+            item.onClick(async () => {
+                await this.copy.copy();
+            });
+        });
+
+        menu.addItem((item) => {
+            item.setTitle('Copy diagram source');
+            item.onClick(async () => {
+                await this.copySource.copy();
+            });
+        });
+
+        menu.showAtMouseEvent(event);
+    }
+
+    cleanUp() {
+        this.events.diagram.container.removeEventListener(
+            'contextmenu',
+            this.handleContextMenu
+        );
+    }
+}

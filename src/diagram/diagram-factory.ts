@@ -1,13 +1,29 @@
-import Diagram from './diagram';
+import Diagram, { DiagramDescriptor, FileStats } from './diagram';
 import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
-import { DiagramData } from '../settings/typing/interfaces';
+import { BaseDiagramDescriptor } from '../adapters/adapters/markdown-preview-adapter';
+import { DiagramSize, SourceData } from '../adapters/base-adapter';
 
 export default class DiagramFactory {
     static createDiagram(
         plugin: DiagramZoomDragPlugin,
-        diagramData: DiagramData,
+        diagramDescriptor: BaseDiagramDescriptor,
+        sourceData: SourceData,
+        size: DiagramSize,
+        fileStats: FileStats,
         container: HTMLElement
     ): Diagram {
-        return new Diagram(plugin, container, diagramData);
+        const extendedDiagramDescriptor = {
+            ...diagramDescriptor,
+            sourceData,
+            size,
+        } as DiagramDescriptor;
+        const diagram = new Diagram(
+            plugin,
+            container,
+            extendedDiagramDescriptor,
+            fileStats
+        );
+        diagram.initialize();
+        return diagram;
     }
 }
