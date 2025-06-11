@@ -5,7 +5,7 @@ import DiagramSection from '../../pages/diagram-section/DiagramSection';
 import PanelSection from '../../pages/panel-section/PanelSection';
 import Toolbar from './toolbar/Toolbar';
 import { AnimatedRoutes } from './RoutesContent.styled';
-import Debug from '../../pages/logging/Logging';
+import Debug from '../../pages/debug/Debug';
 import { Platform } from 'obsidian';
 
 const RoutesContent: React.FC = () => {

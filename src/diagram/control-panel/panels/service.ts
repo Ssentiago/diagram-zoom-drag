@@ -226,24 +226,6 @@ export class ServicePanel extends BasePanel {
         const hidingB: HTMLElement | null = this.panel?.querySelector(
             '#hide-show-button-diagram'
         );
-
-        this.diagram.plugin.observer.subscribe(
-            this.diagram.plugin.app.workspace,
-            EventID.PanelsChangedVisibility,
-            async (e: PanelsChangedVisibility) => {
-                const visible = e.data.visible;
-                if (!hidingB) {
-                    return;
-                }
-                this.hiding = !visible;
-                updateButton(
-                    hidingB,
-                    this.hiding ? 'eye-off' : 'eye',
-                    `${this.hiding ? 'Show' : 'Hide'} move and zoom panels`
-                );
-                setIcon(hidingB, this.hiding ? 'eye-off' : 'eye');
-            }
-        );
     }
 
     /**

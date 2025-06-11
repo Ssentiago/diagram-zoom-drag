@@ -39,7 +39,7 @@ export default class Logger {
     async saveLogsToFile(content: string): Promise<void> {
         try {
             const pluginDir = this.plugin.manifest.dir;
-            if (pluginDir) {
+            if (pluginDir === undefined) {
                 throw new Error(
                     `DiagramZoomDrag: It was not possible to get the way to the plugin. Path:${pluginDir}`
                 );
@@ -127,8 +127,13 @@ export default class Logger {
      * This function does not return any value but logs the gathered system information.
      */
     private async writeSystemInfo(): Promise<void> {
-        const systemInfo = {
-            timestamp: new Date().toISOString(),
+        const systemInfo = this.getSystemInfo();
+        this.addLogEntry(systemInfo);
+    }
+
+    getSystemInfo() {
+        return {
+            timestamp: moment().toISOString(),
             session_start: true,
             obsidian: {
                 version: this.getObsidianVersion(),
@@ -178,8 +183,6 @@ export default class Logger {
                 localStorage_usage: this.getStorageUsage(),
             },
         };
-
-        this.addLogEntry(systemInfo);
     }
 
     /**

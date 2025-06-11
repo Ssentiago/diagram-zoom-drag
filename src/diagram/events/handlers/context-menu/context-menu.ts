@@ -1,15 +1,13 @@
-import { Export } from './export/export';
+import { Export } from './context-actions/export';
 import { Menu } from 'obsidian';
-import { CopyDiagram } from './copy/copy-diagram';
-import { CopyDiagramSource } from './copy/copy-diagram-source';
-import { DiagramData } from '../../../../settings/typing/interfaces';
-import Diagram from '../../../diagram';
+import { CopyDiagram } from './context-actions/copy-diagram';
+import { CopyDiagramSource } from './context-actions/copy-diagram-source';
 import Events, { Handler } from '../../events';
 
 export class ContextMenu implements Handler {
-    private export: Export;
-    private copy: CopyDiagram;
-    private copySource: CopyDiagramSource;
+    private readonly export: Export;
+    private readonly copy: CopyDiagram;
+    private readonly copySource: CopyDiagramSource;
     constructor(public readonly events: Events) {
         this.export = new Export(this);
         this.copy = new CopyDiagram(this);

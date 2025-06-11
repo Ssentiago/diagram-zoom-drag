@@ -7,10 +7,6 @@ import {
 import SettingsManager from '../settings/settings-manager';
 import { SettingsTab } from '../settings/settings-tab';
 import PluginStateChecker from './plugin-state-checker';
-import {
-    EventObserver,
-    EventPublisher,
-} from '../events-management/events-management';
 import { PluginContext } from './plugin-context';
 import Logger from '../logger/logger';
 import Diagram from 'diagram/diagram';
@@ -25,8 +21,6 @@ export default class DiagramZoomDragPlugin extends Plugin {
     state!: State;
     settings!: SettingsManager;
     pluginStateChecker!: PluginStateChecker;
-    publisher!: EventPublisher;
-    observer!: EventObserver;
     diagram!: Diagram;
     logger!: Logger;
     eventBus!: EventEmitter2;
@@ -68,8 +62,6 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns A promise that resolves once the event system has been successfully initialized.
      */
     async initializeEventSystem(): Promise<void> {
-        this.publisher = new EventPublisher(this);
-        this.observer = new EventObserver(this);
         this.eventBus = new EventEmitter2({
             wildcard: true,
             delimiter: '.',
@@ -171,7 +163,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
                 }
                 if (!this.context.isValid) {
                     this.showNotice(
-                        'This command can be called only with Markdown View opened'
+                        'This command can only be used when a Markdown view is open.'
                     );
                     return;
                 }
@@ -207,7 +199,6 @@ export default class DiagramZoomDragPlugin extends Plugin {
         this.pluginStateChecker = new PluginStateChecker(this);
         this.logger = new Logger(this);
         await this.logger.init();
-        this.logger.info('Logger initialized');
         await this.logger.saveLogsToFile(this.logger.exportLogs());
     }
 
@@ -221,7 +212,6 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     async onload(): Promise<void> {
         await this.initializePlugin();
-        console.log('initialize');
     }
 
     /**
@@ -234,7 +224,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     onunload(): void {
         this.state.clear();
-        this.observer.unsubscribeAll();
+        this.eventBus.removeAllListeners();
     }
 
     /**

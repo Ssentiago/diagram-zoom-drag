@@ -23,21 +23,6 @@ const About: React.FC = () => {
                     },
                 ]}
             />
-            <ReactObsidianSetting
-                name={'Do you have any feedback?'}
-                addButtons={[
-                    (button) => {
-                        button.setIcon('message-circle-question');
-                        button.setTooltip('Leave feedback');
-                        button.onClick(() => {
-                            open(
-                                'https://github.com/Ssentiago/diagram-zoom-drag/issues'
-                            );
-                        });
-                        return button;
-                    },
-                ]}
-            />
 
             <FooterContent>
                 <Slogan>Make Obsidian Diagrams Interactify!</Slogan>
