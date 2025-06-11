@@ -1,1 +1,11 @@
-{}
+{
+  "markdown:add-metadata-property": [],
+  "diagram-zoom-drag:diagram-zoom-drag-toggle-panels-management-state": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": ","
+    }
+  ]
+}

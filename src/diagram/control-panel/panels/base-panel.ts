@@ -36,6 +36,7 @@ export abstract class BasePanel extends Component {
         const panel = controlPanel.createEl('div');
         panel.addClass(this.cssClass);
         panel.addClass('diagram-zoom-drag-panel');
+        panel.addClass('visible');
         panel.setCssStyles(this.cssStyles);
         return panel;
     }

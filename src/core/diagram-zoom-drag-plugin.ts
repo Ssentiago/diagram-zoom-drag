@@ -164,9 +164,18 @@ export default class DiagramZoomDragPlugin extends Plugin {
             name: 'Toggle control panels visibility for all diagrams in current note',
             checkCallback: (checking) => {
                 if (checking) {
-                    return this.isInLivePreviewMode || this.isInPreviewMode;
+                    return (
+                        (this.isInLivePreviewMode || this.isInPreviewMode) &&
+                        this.context.isValid
+                    );
                 }
-                const diagrams = [] as Diagram[];
+                if (!this.context.isValid) {
+                    this.showNotice(
+                        'This command can be called only with Markdown View opened'
+                    );
+                    return;
+                }
+                const diagrams = this.state.getDiagrams(this.context.leafID!);
 
                 const anyVisible = diagrams.some((diagram) =>
                     diagram.controlPanel.hasVisiblePanels()
@@ -177,6 +186,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
                         ? diagram.controlPanel.hide(TriggerType.FORCE)
                         : diagram.controlPanel.show(TriggerType.FORCE)
                 );
+                const message = anyVisible
+                    ? 'Control panels hidden'
+                    : 'Control panels shown';
+                this.showNotice(message);
             },
         });
     }

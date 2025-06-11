@@ -56,7 +56,7 @@ export default class State {
     }
 
     getDiagrams(leafID: LeafID) {
-        return this.data.get(leafID)?.diagrams;
+        return this.data.get(leafID)?.diagrams ?? [];
     }
 
     pushDiagram(leafID: LeafID, diagram: Diagram) {
