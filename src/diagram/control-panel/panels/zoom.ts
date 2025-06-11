@@ -1,9 +1,10 @@
 import { ControlPanel } from '../control-panel';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { BasePanel } from './base-panel';
+import { IControlPanel } from '../typing/interfaces';
 
 export class ZoomPanel extends BasePanel {
-    constructor(controlPanel: ControlPanel) {
+    constructor(controlPanel: IControlPanel) {
         super(controlPanel);
     }
 
@@ -13,13 +14,15 @@ export class ZoomPanel extends BasePanel {
      * This method creates the HTML element of the zoom panel and assigns it to the `panel` property.
      */
     initialize(): void {
-        this.panel = this.createPanel();
+        super.initialize();
     }
 
     get enabled(): boolean {
         return (
             this.controlPanel.diagram.plugin.settings.data.panels.local.panels
-                .zoom.on && this.controlPanel.diagram.diagramData.panels.zoom.on
+                .zoom.on &&
+            this.controlPanel.diagram.diagramDescriptor.diagramData.panels.zoom
+                .on
         );
     }
 
@@ -101,20 +104,17 @@ export class ZoomPanel extends BasePanel {
      *
      * @returns The HTML element of the zoom panel.
      */
-    createPanel(): HTMLElement {
-        const zoomPanel = this.createPanelElement();
-        zoomPanel.toggleClass(
+    setupPanelContents() {
+        this.panel.toggleClass(
             'hidden',
             this.controlPanel.diagram.plugin.settings.data.panels.global
                 .triggering.mode !== PanelsTriggering.ALWAYS
         );
         const zoomButtons = this.getButtons();
         zoomButtons.forEach((btn) =>
-            zoomPanel.appendChild(
+            this.panel.appendChild(
                 this.createButton(btn.icon, btn.action, btn.title, true)
             )
         );
-
-        return zoomPanel;
     }
 }

@@ -56,6 +56,7 @@
         "typescript": "5.5.4"
     },
     "dependencies": {
+        "dependency-cruiser": "^16.10.2",
         "eventemitter2": "^6.4.9",
         "hash.js": "^1.1.7",
         "lucide-react": "^0.514.0",

@@ -1,20 +1,21 @@
-import { ControlPanel } from '../control-panel';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { BasePanel } from './base-panel';
 
+import { IControlPanel } from '../typing/interfaces';
+
 export class MovePanel extends BasePanel {
-    constructor(controlPanel: ControlPanel) {
+    constructor(controlPanel: IControlPanel) {
         super(controlPanel);
     }
 
     initialize(): void {
-        this.panel = this.createPanel();
+        super.initialize();
     }
 
     get enabled(): boolean {
         return (
             this.diagram.plugin.settings.data.panels.local.panels.move.on &&
-            this.diagram.diagramData.panels.move.on
+            this.diagram.diagramDescriptor.diagramData.panels.move.on
         );
     }
 
@@ -145,9 +146,8 @@ export class MovePanel extends BasePanel {
      *
      * @returns The HTML element of the move panel.
      */
-    createPanel(): HTMLElement {
-        const panel = this.createPanelElement();
-        panel.toggleClass(
+    setupPanelContents() {
+        this.panel.toggleClass(
             'hidden',
             this.diagram.plugin.settings.data.panels.global.triggering.mode !==
                 PanelsTriggering.ALWAYS
@@ -164,8 +164,7 @@ export class MovePanel extends BasePanel {
                 btn.id
             );
             button.style.gridArea = btn.gridArea;
-            panel.appendChild(button);
+            this.panel.appendChild(button);
         });
-        return panel;
     }
 }

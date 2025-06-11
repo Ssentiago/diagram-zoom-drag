@@ -1,7 +1,8 @@
 import Events, { Handler } from '../events';
-import { DiagramSelectors } from '../../typing/constants';
+import { DiagramSelectors, TriggerType } from '../../typing/constants';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
-import { TriggerType } from '../../control-panel/control-panel';
+import { Simulate } from 'react-dom/test-utils';
+import mouseLeave = Simulate.mouseLeave;
 
 export class MouseHandler implements Handler {
     private startX!: number;
@@ -99,7 +100,7 @@ export class MouseHandler implements Handler {
      * @param diagramElement - The diagram element.
      * @param event - The wheel event.
      */
-    private wheel(event: WheelEvent): void {
+    private wheel = (event: WheelEvent): void => {
         if (
             !event.ctrlKey &&
             document.fullscreenElement !== this.events.diagram.container
@@ -125,7 +126,7 @@ export class MouseHandler implements Handler {
         diagramElement.setCssStyles({
             transform: `translate(${this.events.diagram.dx}px, ${this.events.diagram.dy}px) scale(${this.events.diagram.scale})`,
         });
-    }
+    };
 
     /**
      * Handles the mouse down event for the diagram element.
@@ -136,7 +137,7 @@ export class MouseHandler implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the function.
      */
-    private mouseDown(event: MouseEvent): void {
+    private mouseDown = (event: MouseEvent): void => {
         if (event.button !== 0) {
             return;
         }
@@ -153,7 +154,7 @@ export class MouseHandler implements Handler {
             cursor: 'grabbing',
         });
         event.preventDefault();
-    }
+    };
 
     /**
      * Handles the mouse move event for the diagram element.
@@ -165,7 +166,7 @@ export class MouseHandler implements Handler {
      * @param diagramElement - The diagram element that is being moved.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseMove(event: MouseEvent): void {
+    private mouseMove = (event: MouseEvent): void => {
         if (!this.isDragging) {
             return;
         }
@@ -178,7 +179,7 @@ export class MouseHandler implements Handler {
         diagramElement.setCssStyles({
             transform: `translate(${this.events.diagram.dx}px, ${this.events.diagram.dy}px) scale(${this.events.diagram.scale})`,
         });
-    }
+    };
 
     /**
      * Handles the mouse up event for the diagram element.
@@ -189,12 +190,12 @@ export class MouseHandler implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseUp(event: MouseEvent): void {
+    private mouseUp = (event: MouseEvent): void => {
         const { container, diagramElement } = this.elements;
 
         this.isDragging = false;
         diagramElement.setCssStyles({ cursor: 'grab' });
-    }
+    };
 
     /**
      * Handles the mouse leave event for the diagram element.
@@ -206,15 +207,17 @@ export class MouseHandler implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseLeave(event: MouseEvent): void {
+    private mouseLeave = (event: MouseEvent): void => {
         this.mouseUp(event);
-    }
+    };
 
-    private mouseEnterOnDiagram(e: MouseEvent): void {
+    private mouseEnterOnDiagram = (e: MouseEvent): void => {
         this.events.diagram.controlPanel.show(TriggerType.MOUSE);
-    }
+    };
 
-    private mouseLeaveOutDiagram(e: MouseEvent): void {}
+    private mouseLeaveOutDiagram = (e: MouseEvent): void => {
+        this.events.diagram.controlPanel.hide(TriggerType.MOUSE);
+    };
 
     cleanUp() {
         this.events.diagram.container.removeEventListener('wheel', this.wheel);

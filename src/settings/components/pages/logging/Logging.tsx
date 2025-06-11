@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
 import { useSettingsContext } from '../../core/SettingsContext';
 import { normalizePath, Platform } from 'obsidian';
+import { DebugLevel } from '../../../typing/interfaces';
 
 const Debug: React.FC = () => {
     const { plugin } = useSettingsContext();
@@ -15,11 +16,10 @@ const Debug: React.FC = () => {
                 desc={'Enable debug logging for troubleshooting'}
                 addToggles={[
                     (toggle) => {
-                        toggle.setValue(false); // пока захардкодить
+                        toggle.setValue(plugin.settings.data.debug.enabled);
                         toggle.onChange(async (value) => {
-                            // TODO: добавить в настройки
-                            // plugin.settings.data.logger.enabled = value;
-                            // await plugin.settings.saveSettings();
+                            plugin.settings.data.debug.enabled = value;
+                            await plugin.settings.saveSettings();
                         });
                         return toggle;
                     },
@@ -37,7 +37,13 @@ const Debug: React.FC = () => {
                             info: 'Info',
                             debug: 'Debug',
                         });
-                        dropdown.setValue('info');
+                        dropdown.setValue(plugin.settings.data.debug.level);
+                        dropdown.onChange(async (value) => {
+                            plugin.settings.data.debug.level =
+                                value as DebugLevel;
+                            await plugin.settings.saveSettings();
+                        });
+
                         return dropdown;
                     },
                 ]}

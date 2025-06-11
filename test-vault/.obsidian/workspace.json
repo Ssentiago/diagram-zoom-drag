@@ -1,20 +1,24 @@
 {
   "main": {
-    "id": "75ce99fe45b071da",
+    "id": "b57ebde19c06f3df",
     "type": "split",
     "children": [
       {
-        "id": "f63e1a8e247dbd5b",
+        "id": "b11d1e08f36628ad",
         "type": "tabs",
         "children": [
           {
-            "id": "6622370f675ebd7b",
+            "id": "f2588c036259bea3",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "simple mermaid.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "simple mermaid"
             }
           }
         ]
@@ -23,15 +27,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "c86d034f3f281551",
+    "id": "1cc58badde7d8059",
     "type": "split",
     "children": [
       {
-        "id": "6678621caf5d905c",
+        "id": "e5c0132e52f24fc7",
         "type": "tabs",
         "children": [
           {
-            "id": "bef88c7675a15120",
+            "id": "46b953f1233777c4",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -44,7 +48,7 @@
             }
           },
           {
-            "id": "78bd335c2c75cca8",
+            "id": "035e3442bbe90b10",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -61,7 +65,7 @@
             }
           },
           {
-            "id": "315a0eaebd0aedc1",
+            "id": "bab6f5ffb5d4d010",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -74,23 +78,22 @@
       }
     ],
     "direction": "horizontal",
-    "width": 257.5
+    "width": 300
   },
   "right": {
-    "id": "dfece06dc10863e1",
+    "id": "9cd10ca0cce07af7",
     "type": "split",
     "children": [
       {
-        "id": "96f852399fa98bd9",
+        "id": "8b503150170c88d7",
         "type": "tabs",
         "children": [
           {
-            "id": "13d715657f2e44e6",
+            "id": "cbe71159640ffefa",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Untitled 3.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -100,25 +103,24 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Untitled 3"
+              "title": "Backlinks"
             }
           },
           {
-            "id": "ccccc7f3b5c07df8",
+            "id": "f0ec5c1419c60800",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Untitled 3.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Untitled 3"
+              "title": "Outgoing links"
             }
           },
           {
-            "id": "45e0677ad0579a41",
+            "id": "3ce35a07360bcac6",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -133,74 +135,45 @@
             }
           },
           {
-            "id": "9f4ff39a28603aa5",
+            "id": "3014ff035a4ef281",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Untitled 3.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Untitled 3"
+              "title": "Outline"
             }
           }
         ]
       }
     ],
     "direction": "horizontal",
-    "width": 490.5,
+    "width": 300,
     "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "obsidian-mobile-emulator-toggle:Switch to PC emulation": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "obsidian-mobile-emulator-toggle:Switch to PC emulation": false
     }
   },
-  "active": "bef88c7675a15120",
+  "active": "f2588c036259bea3",
   "lastOpenFiles": [
-    "home/arseny/WebstormProjects/diagram-zoom-drag/test-vault",
-    "home/arseny/WebstormProjects/diagram-zoom-drag",
-    "home/arseny/WebstormProjects",
-    "home/arseny",
-    "home",
     "simple mermaid.md",
     "very huge mermaid.md",
-    "mehrmaid.md",
-    "graphviz.md",
-    "huge plantuml.md",
     "one huge mermaid and two mehrmaids.md",
-    "many huge mermaids.md",
-    "huge plantuml.md~",
-    "latex.md",
+    "huge plantuml.md",
     "three simple mermaids.md",
-    "two simple mermaid and one huge.md",
-    "ww.md",
-    "Untitled.md",
-    "Untitled 9.md",
-    "Untitled 8.md",
-    "Untitled 7.md",
-    "Untitled 6.md",
-    "Untitled 5.md",
-    "Untitled 4.md",
-    "Untitled 3.md",
-    "Untitled 2.md",
-    "Untitled 1.md",
-    "Test.md",
-    "bear-facing-right-svgrepo-com.svg",
-    "Test-2024-09-14_01-47-35.svg",
-    "Untitled-2024-09-14_01-49-41.svg",
-    "Untitled-2024-09-14_01-48-09.svg",
-    "Test-2024-09-14_01-30-09.svg",
-    "Test-2024-09-14_01-29-09.svg",
-    "Test-2024-09-14_01-25-49.svg"
+    "mehrmaid.md",
+    "many huge mermaids.md"
   ]
 }

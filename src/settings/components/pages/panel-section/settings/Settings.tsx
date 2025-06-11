@@ -6,9 +6,9 @@ import { PanelsTriggering } from '../../../../typing/interfaces';
 const Settings: React.FC = () => {
     const { plugin } = useSettingsContext();
 
-    const [isIgnoringSettingVisible, setIsIgnoringSettingVisible] = useState(
-        plugin.settings.data.panels.global.triggering.mode !==
-            PanelsTriggering.HOVER
+    const [isIgnoringSettingHidden, setIsIgnoringSettingHidden] = useState(
+        plugin.settings.data.panels.global.triggering.mode ===
+            PanelsTriggering.ALWAYS
     );
 
     return (
@@ -23,6 +23,7 @@ const Settings: React.FC = () => {
                         dropdown.addOptions({
                             always: 'Always',
                             hover: 'On hover',
+                            focus: 'On focus',
                         });
                         dropdown.setValue(
                             plugin.settings.data.panels.global.triggering.mode
@@ -30,8 +31,8 @@ const Settings: React.FC = () => {
                         dropdown.onChange(async (value) => {
                             plugin.settings.data.panels.global.triggering.mode =
                                 value as PanelsTriggering;
-                            setIsIgnoringSettingVisible(
-                                value !== PanelsTriggering.HOVER
+                            setIsIgnoringSettingHidden(
+                                value === PanelsTriggering.ALWAYS
                             );
                             await plugin.settings.saveSettings();
                         });
@@ -40,7 +41,7 @@ const Settings: React.FC = () => {
                 ]}
             />
 
-            {!isIgnoringSettingVisible && (
+            {!isIgnoringSettingHidden && (
                 <ReactObsidianSetting
                     name={'Ignore panel visibility rule for service panel'}
                     desc={

@@ -49,6 +49,7 @@ export interface DimensionSetting {
 export enum PanelsTriggering {
     ALWAYS = 'always',
     HOVER = 'hover',
+    FOCUS = 'focus',
 }
 
 export interface Position {
@@ -103,7 +104,7 @@ export interface Panels {
     };
 }
 
-interface Diagrams {
+export interface Diagrams {
     settingsPagination: {
         perPage: number;
     };

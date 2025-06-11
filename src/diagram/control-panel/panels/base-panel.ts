@@ -1,15 +1,17 @@
 import { updateButton } from '../helpers/helpers';
-import Diagram from '../../diagram';
-import { ControlPanel, TriggerType } from '../control-panel';
+import { IControlPanel } from '../typing/interfaces';
+import { TriggerType } from '../../typing/constants';
+import { ServicePanel } from './service';
+import { hide } from 'concurrently/dist/src/defaults';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 
 export abstract class BasePanel {
-    protected panel: HTMLElement | null = null;
+    protected panel!: HTMLElement;
 
-    constructor(protected controlPanel: ControlPanel) {}
+    constructor(protected controlPanel: IControlPanel) {}
 
     abstract get enabled(): boolean;
-    protected abstract createPanel(): void;
+    protected abstract setupPanelContents(): void;
 
     get diagram() {
         return this.controlPanel.diagram;
@@ -21,8 +23,9 @@ export abstract class BasePanel {
         }
 
         this.panel = this.createPanelElement();
-        this.createPanel();
-        this.updateVisibility();
+        this.setupPanelContents();
+
+        this.visibilityInitialization();
     }
 
     protected createPanelElement(): HTMLElement {
@@ -97,17 +100,25 @@ export abstract class BasePanel {
     protected abstract get cssClass(): string;
     protected abstract get cssStyles(): object;
 
-    updateVisibility(): void {
-        if (!this.panel) {
-            return;
-        }
-
+    visibilityInitialization(): void {
+        const triggeringMode =
+            this.controlPanel.diagram.plugin.settings.data.panels.global
+                .triggering.mode;
         const isFolded =
             this.controlPanel.diagram.container.dataset.folded === 'true';
+        let trigger = TriggerType.NONE;
 
-        const trigger = TriggerType.FOLD;
+        if (isFolded) {
+            trigger |= TriggerType.FOLD;
+        }
+        if (triggeringMode === 'focus') {
+            trigger |= TriggerType.FOCUS;
+        }
+        if (triggeringMode === 'hover') {
+            trigger |= TriggerType.MOUSE;
+        }
 
-        isFolded ? this.show(trigger) : this.hide(trigger);
+        this.hide(trigger);
     }
 
     show(triggerType: TriggerType): void {
@@ -118,7 +129,9 @@ export abstract class BasePanel {
             return;
         }
 
-        if (!this.panel) return;
+        if (!this.panel) {
+            return;
+        }
         this.panel.removeClass('hidden');
         this.panel.addClass('visible');
     }
@@ -151,12 +164,15 @@ export abstract class BasePanel {
     }
 
     protected get supportedTriggers(): number {
-        let base = TriggerType.FORCE | TriggerType.FOLD;
-        if (
-            this.diagram.plugin.settings.data.panels.global.triggering.mode ===
-            'hover'
-        ) {
+        const triggeringOptions =
+            this.diagram.plugin.settings.data.panels.global.triggering;
+        let base =
+            TriggerType.FORCE | TriggerType.FOLD | TriggerType.SERVICE_HIDING;
+        if (triggeringOptions.mode === 'hover') {
             base = base | TriggerType.MOUSE;
+        }
+        if (triggeringOptions.mode === 'focus') {
+            base = base | TriggerType.FOCUS;
         }
 
         // in that way we can add support to mouse (focus) triggering. or for keypress

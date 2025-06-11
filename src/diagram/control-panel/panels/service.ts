@@ -1,27 +1,29 @@
 import { Platform, setIcon } from 'obsidian';
 import { updateButton } from '../helpers/helpers';
-import { ControlPanel, TriggerType } from '../control-panel';
+import { ControlPanel } from '../control-panel';
 import { EventID } from '../../../events-management/typing/constants';
 import { PanelsChangedVisibility } from '../../../events-management/typing/interface';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { BasePanel } from './base-panel';
+import { IControlPanel } from '../typing/interfaces';
+import { TriggerType } from '../../typing/constants';
 
 export class ServicePanel extends BasePanel {
     hiding = false;
 
-    constructor(controlPanel: ControlPanel) {
+    constructor(controlPanel: IControlPanel) {
         super(controlPanel);
     }
 
     initialize(): void {
-        this.panel = this.createPanel();
+        super.initialize();
         this.setupEventListeners();
     }
 
     get enabled(): boolean {
         return (
             this.diagram.plugin.settings.data.panels.local.panels.service.on &&
-            this.diagram.diagramData.panels.service.on
+            this.diagram.diagramDescriptor.diagramData.panels.service.on
         );
     }
 
@@ -71,37 +73,19 @@ export class ServicePanel extends BasePanel {
             buttons.push({
                 icon: this.hiding ? 'eye-off' : 'eye',
                 action: (): void => {
-                    // const panelsData = undefined; // this.diagram.state.panelsData;
-                    // return;
-                    //
-                    // if (!panelsData?.panels) {
-                    //     return;
-                    // }
-                    //
-                    // this.hiding = !this.hiding;
-                    //
-                    // [panelsData.panels.move, panelsData.panels.zoom].forEach(
-                    //     (panel) => {
-                    //         if (!panel.panel) {
-                    //             return;
-                    //         }
-                    //
-                    //         panel.panel.toggleClass('hidden', this.hiding);
-                    //         panel.panel.toggleClass('visible', !this.hiding);
-                    //     }
-                    // );
-                    //
-                    // const button: HTMLElement | null = this.panel.querySelector(
-                    //     '#hide-show-button-diagram'
-                    // );
-                    // if (!button) {
-                    //     return;
-                    // }
-                    // updateButton(
-                    //     button,
-                    //     !this.hiding ? 'eye' : 'eye-off',
-                    //     `${this.hiding ? 'Show' : 'Hide'} move and zoom panels`
-                    // );
+                    this.hiding
+                        ? this.controlPanel.show(TriggerType.SERVICE_HIDING)
+                        : this.controlPanel.hide(TriggerType.SERVICE_HIDING);
+                    const button: HTMLElement | null = this.panel.querySelector(
+                        '#hide-show-button-diagram'
+                    );
+                    this.hiding = !this.hiding;
+                    button &&
+                        updateButton(
+                            button,
+                            !this.hiding ? 'eye' : 'eye-off',
+                            `${this.hiding ? 'Show' : 'Hide'} move and zoom panels`
+                        );
                 },
                 title: `Hide move and zoom panels`,
                 id: 'hide-show-button-diagram',
@@ -152,8 +136,9 @@ export class ServicePanel extends BasePanel {
                     this.diagram.nativeTouchEventsEnabled =
                         !this.diagram.nativeTouchEventsEnabled;
 
-                    const btn: HTMLElement | null | undefined =
-                        this.panel?.querySelector('#native-touch-event');
+                    const btn: HTMLElement | null = this.panel?.querySelector(
+                        '#native-touch-event'
+                    );
                     if (!btn) {
                         return;
                     }
@@ -189,11 +174,10 @@ export class ServicePanel extends BasePanel {
      *
      * @returns The HTML element of the service panel.
      */
-    createPanel(): HTMLElement {
-        const servicePanel = this.createPanelElement();
+    setupPanelContents() {
         const settings = this.diagram.plugin.settings;
 
-        servicePanel.toggleClass(
+        this.panel.toggleClass(
             'hidden',
             settings.data.panels.global.triggering.mode !==
                 PanelsTriggering.ALWAYS &&
@@ -202,12 +186,10 @@ export class ServicePanel extends BasePanel {
 
         const serviceButtons = this.getButtons();
         serviceButtons.forEach((btn) =>
-            servicePanel.appendChild(
+            this.panel.appendChild(
                 this.createButton(btn.icon, btn.action, btn.title, true, btn.id)
             )
         );
-
-        return servicePanel;
     }
 
     /**
@@ -224,8 +206,8 @@ export class ServicePanel extends BasePanel {
      *   and zoom panels.
      */
     setupEventListeners(): void {
-        const fullscreenButton: HTMLElement | null | undefined =
-            this.panel?.querySelector('#fullscreen-button');
+        const fullscreenButton: HTMLElement | null =
+            this.panel.querySelector('#fullscreen-button');
 
         if (!fullscreenButton) {
             return;
@@ -241,8 +223,9 @@ export class ServicePanel extends BasePanel {
             )
         );
 
-        const hidingB: HTMLElement | null | undefined =
-            this.panel?.querySelector('#hide-show-button-diagram');
+        const hidingB: HTMLElement | null = this.panel?.querySelector(
+            '#hide-show-button-diagram'
+        );
 
         this.diagram.plugin.observer.subscribe(
             this.diagram.plugin.app.workspace,
@@ -301,7 +284,8 @@ export class ServicePanel extends BasePanel {
             return base;
         }
 
-        const unSupportedFlags = TriggerType.MOUSE; // потенциально: + Focus и т.д.
+        const unSupportedFlags =
+            TriggerType.SERVICE_HIDING | TriggerType.MOUSE | TriggerType.FOCUS;
         return base & ~unSupportedFlags;
     }
 }

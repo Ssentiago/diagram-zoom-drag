@@ -5,7 +5,6 @@ import {
     ReactObsidianSetting,
 } from 'react-obsidian-setting';
 import { useSettingsContext } from '../../../../../core/SettingsContext';
-import { startCase } from 'lodash';
 
 interface ButtonManagementModalProps {
     onClose: () => void;
@@ -119,7 +118,12 @@ const ButtonManagementModal: React.FC<ButtonManagementModalProps> = ({
             <ReactObsidianSetting name={'Panel buttons section'} setHeading />
             {Object.entries(buttonData).map(([panel, panelData]) => (
                 <React.Fragment key={panel}>
-                    <ReactObsidianSetting name={startCase(panel)} setHeading />
+                    <ReactObsidianSetting
+                        name={panel
+                            .charAt(0)
+                            .concat(panel.slice(1).toLowerCase())}
+                        setHeading
+                    />
                     {panelData.map(
                         ({ tooltip, icon, getValue, setValue }, index) => (
                             <ReactObsidianSetting

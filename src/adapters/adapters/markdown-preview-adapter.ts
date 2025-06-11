@@ -1,35 +1,37 @@
 import { MarkdownPostProcessorContext } from 'obsidian';
-import { BaseAdapter } from '../base-adapter';
-import { Diagram } from '../../diagram';
-import { DiagramData } from '../../../settings/typing/interfaces';
+import { BaseAdapter, ContextData } from '../base-adapter';
+import { DiagramData } from '../../settings/typing/interfaces';
+import DiagramZoomDragPlugin from '../../core/diagram-zoom-drag-plugin';
+import { LeafID } from '../../core/state';
+import { FileStats } from '../../diagram/diagram';
+
+export interface BaseDiagramDescriptor {
+    diagramData: DiagramData;
+    diagramElement: HTMLElement;
+}
 
 export class MarkdownPreviewAdapter extends BaseAdapter {
-    constructor(diagram: Diagram) {
-        super(diagram);
+    constructor(plugin: DiagramZoomDragPlugin, fileStats: FileStats) {
+        super(plugin, fileStats);
     }
 
-    /**
-     * Initializes the adapter by determining and using the appropriate diagram.
-     * If the HTML element passed is a diagram, the adapter will process it immediately.
-     * If not, the adapter will set up a MutationObserver to wait for the diagram to appear
-     * in the element (up to 5 seconds).
-     *
-     * @param el - The HTML element that represents the diagram.
-     * @param context - Optional Markdown post-processing context
-     *
-     * @returns A promise that resolves once the adapter has been successfully initialized.
-     */
     async initialize(
+        leafID: LeafID,
         el: HTMLElement,
-        context?: MarkdownPostProcessorContext
+        context?: MarkdownPostProcessorContext,
+        hasLivePreviewObserver?: boolean
     ): Promise<void> {
         if (!context) {
             return;
         }
+        const contextData = {
+            context: context,
+            contextEl: el,
+        };
 
-        const diagram = await this.isThatADiagram(el);
-        if (!!diagram) {
-            await this.processDiagram(diagram, context);
+        const diagramDescriptor = await this.isThatADiagram(el);
+        if (!!diagramDescriptor) {
+            await this.processDiagram(leafID, diagramDescriptor, contextData);
             return;
         }
 
@@ -44,9 +46,13 @@ export class MarkdownPreviewAdapter extends BaseAdapter {
                     }
                     const target = addedNode;
 
-                    const diagram = await this.isThatADiagram(target);
-                    if (diagram) {
-                        await this.processDiagram(diagram, context);
+                    const diagramDescriptor = await this.isThatADiagram(target);
+                    if (diagramDescriptor) {
+                        await this.processDiagram(
+                            leafID,
+                            diagramDescriptor,
+                            contextData
+                        );
                     }
                 }
             }
@@ -63,28 +69,26 @@ export class MarkdownPreviewAdapter extends BaseAdapter {
     }
 
     async processDiagram(
-        diagram: {
-            diagramData: DiagramData;
-            diagramElement: HTMLElement;
-        },
-        context: MarkdownPostProcessorContext
+        leafID: LeafID,
+        diagramDescriptor: BaseDiagramDescriptor,
+        contextData: ContextData
     ): Promise<void> {
-        const canContinue = this.initializationGuard(diagram.diagramElement);
+        const canContinue = this.initializationGuard(
+            diagramDescriptor.diagramElement
+        );
         if (!canContinue) {
             return;
         }
-        const sourceData = this.sourceExtractionWithContext(
-            diagram.diagramElement,
-            {
-                contextElement: diagram.diagramElement,
-                context: context,
-            }
-        );
-        const size = this.getDiagramSize(diagram.diagramElement);
+
+        const sourceData = this.sourceExtractionWithContext(contextData);
+        const size = this.getDiagramSize(diagramDescriptor);
         if (size === undefined) {
             return;
         }
-        const container = await this.createDiagramWrapper(diagram, sourceData);
-        this.postInitDiagram(diagram, container, sourceData, size);
+        const container = await this.createDiagramWrapper(
+            diagramDescriptor,
+            sourceData
+        );
+        this.createDiagram(diagramDescriptor, container, sourceData, size);
     }
 }

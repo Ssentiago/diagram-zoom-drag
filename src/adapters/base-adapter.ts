@@ -1,17 +1,42 @@
-import { Diagram } from '../diagram';
 import { MarkdownPostProcessorContext } from 'obsidian';
-import { DiagramData } from '../../settings/typing/interfaces';
+import { DiagramData } from '../settings/typing/interfaces';
 import hash from 'hash.js';
 import { HTMLElementWithCMView } from './typing/interfaces';
-import { DiagramSize } from '../state/typing/interfaces';
-import { ContainerID } from '../state/typing/types';
+import DiagramZoomDragPlugin from '../core/diagram-zoom-drag-plugin';
+import DiagramFactory from '../diagram/diagram-factory';
+import { LeafID } from '../core/state';
+import { BaseDiagramDescriptor } from './adapters/markdown-preview-adapter';
+import Diagram, { FileStats } from '../diagram/diagram';
+
+export type ContainerID = string & { __brand: 'diagram_ID' };
+
+export interface SourceData {
+    source: string;
+    lineStart: number;
+    lineEnd: number;
+}
+
+export interface DiagramSize {
+    width: number;
+    height: number;
+}
+
+export interface ContextData {
+    contextEl: HTMLElement;
+    context: MarkdownPostProcessorContext;
+}
 
 export abstract class BaseAdapter {
-    constructor(protected diagram: Diagram) {}
+    constructor(
+        protected plugin: DiagramZoomDragPlugin,
+        protected fileStat: FileStats
+    ) {}
 
     abstract initialize(
+        leafID: LeafID,
         el: Element,
-        context?: MarkdownPostProcessorContext
+        context?: MarkdownPostProcessorContext,
+        hasLivePreviewObserver?: boolean
     ): Promise<void>;
 
     /**
@@ -22,9 +47,7 @@ export abstract class BaseAdapter {
      */
     protected async isThatADiagram(
         element: Element
-    ): Promise<
-        { diagramData: DiagramData; diagramElement: HTMLElement } | undefined
-    > {
+    ): Promise<BaseDiagramDescriptor | undefined> {
         const diagram = this.findDiagram(element);
 
         const svg = diagram?.diagramElement.querySelector('svg');
@@ -51,7 +74,7 @@ export abstract class BaseAdapter {
     protected findDiagram(
         element: Element
     ): { diagramData: DiagramData; diagramElement: HTMLElement } | null {
-        for (const diagram of this.diagram.plugin.settings.data.diagrams
+        for (const diagram of this.plugin.settings.data.diagrams
             .supported_diagrams) {
             if (!diagram.on) {
                 continue;
@@ -79,8 +102,9 @@ export abstract class BaseAdapter {
      * the diagram element does not exist.
      */
     protected getDiagramSize(
-        el: HTMLElement
+        diagramDescriptor: BaseDiagramDescriptor
     ): { height: number; width: number } | undefined {
+        const el = diagramDescriptor.diagramElement;
         const svg = el.querySelector('svg');
         const img = el.querySelector('img');
 
@@ -97,27 +121,13 @@ export abstract class BaseAdapter {
         };
     }
 
-    /**
-     * Generates a unique ID for a diagram container.
-     *
-     * This method combines the diagram's name, the line numbers for the start and
-     * end of the diagram, and the file's creation time to create a unique ID for
-     * the diagram container. The ID is then hashed using SHA-256 to provide a
-     * unique and consistent identifier.
-     *
-     * @param lineStart - The line number at which the diagram starts.
-     * @param lineEnd - The line number at which the diagram ends.
-     * @param diagram - The diagram data for which to generate the ID.
-     * @returns A unique ID for the diagram container.
-     */
     protected async genID(
-        lineStart: number,
-        lineEnd: number,
+        sourceData: SourceData,
         diagram: DiagramData
     ): Promise<ContainerID> {
-        const preId = `${diagram.name}:${lineStart}-${lineEnd}`;
+        const preId = `${diagram.name}:${sourceData.lineStart}-${sourceData.lineEnd}`;
         const hashed_data = hash.sha256().update(preId).digest('hex');
-        const ctime = this.diagram.plugin.context.view?.file?.stat.ctime ?? 0;
+        const ctime = this.plugin.context.view?.file?.stat.ctime ?? 0;
         return `id-${ctime}-${hashed_data}` as ContainerID;
     }
 
@@ -136,20 +146,10 @@ export abstract class BaseAdapter {
      *          unavailable, it returns default values indicating no source.
      */
     protected sourceExtractionWithContext(
-        el: HTMLElement,
-        contextData: {
-            contextElement: HTMLElement;
-            context: MarkdownPostProcessorContext;
-        }
-    ):
-        | { source: 'No source available'; lineStart: 0; lineEnd: 0 }
-        | {
-              source: string;
-              lineStart: number;
-              lineEnd: number;
-          } {
+        contextData: ContextData
+    ): SourceData {
         const sectionsInfo = contextData.context.getSectionInfo(
-            contextData.contextElement
+            contextData.contextEl
         );
 
         if (!sectionsInfo) {
@@ -184,11 +184,7 @@ export abstract class BaseAdapter {
      *          ending line numbers. If the widget data is unavailable, it returns
      *          'No source available' with line numbers set to 0.
      */
-    protected sourceExtractionWithoutContext(el: HTMLElement): {
-        source: string;
-        lineStart: number;
-        lineEnd: number;
-    } {
+    protected sourceExtractionWithoutContext(el: HTMLElement): SourceData {
         const parent = el.parentElement as HTMLElementWithCMView;
         const widgetData = parent.cmView?.deco?.widget;
         if (!widgetData) {
@@ -206,23 +202,8 @@ export abstract class BaseAdapter {
         };
     }
 
-    /**
-     * Creates a container element for a diagram and initializes it with the
-     * provided diagram and source data.
-     *
-     * This method creates a new container element for the diagram, sets its class
-     * to 'diagram-container', and appends the diagram element to it. It also
-     * sets attributes on the container indicating the rendering mode and whether
-     * it is folded. Finally, it returns the container element.
-     *
-     * @param diagram - An object containing the diagram data and the HTML element
-     *                  of the diagram.
-     * @param sourceData - An object containing the source code and its line
-     *                     numbers.
-     * @returns A promise that resolves to the container element.
-     */
     async createDiagramWrapper(
-        diagram: { diagramData: DiagramData; diagramElement: HTMLElement },
+        diagramDescriptor: BaseDiagramDescriptor,
         sourceData: {
             source: string;
             lineStart: number;
@@ -230,11 +211,11 @@ export abstract class BaseAdapter {
         }
     ): Promise<HTMLElement> {
         const container = document.createElement('div');
-        const el = diagram.diagramElement;
+        const el = diagramDescriptor.diagramElement;
         el.addClass('diagram-content');
 
         container.addClass('diagram-container');
-        const renderingMode = this.diagram.plugin.isInPreviewMode
+        const renderingMode = this.plugin.isInPreviewMode
             ? 'preview'
             : 'live-preview';
         container.setAttribute(
@@ -245,13 +226,12 @@ export abstract class BaseAdapter {
         container.appendChild(el);
 
         container.id = await this.genID(
-            sourceData.lineStart,
-            sourceData.lineEnd,
-            diagram.diagramData
+            sourceData,
+            diagramDescriptor.diagramData
         );
         container.setAttribute(
             'data-folded',
-            this.diagram.plugin.settings.data.diagrams.folding.foldByDefault.toString()
+            this.plugin.settings.data.diagrams.folding.foldByDefault.toString()
         );
 
         container.setAttribute('tabindex', '0');
@@ -279,43 +259,24 @@ export abstract class BaseAdapter {
         return true;
     }
 
-    /**
-     * Performs initialization tasks after a diagram container has been created.
-     *
-     * This method is called after a diagram container has been created and the
-     * diagram has been inserted into it. It initializes the container state with
-     * default values and sets the source of the diagram. It also initializes the
-     * control panel, event handlers, context menu, and updates the diagram size.
-     * Finally, it fits the diagram to the container.
-     *
-     * @param diagram - An object containing the diagram data and the HTML element
-     *                  of the diagram.
-     * @param container - The container element of the diagram.
-     * @param sourceData - An object containing the source code and its line
-     *                     numbers.
-     * @param size - The size of the diagram.
-     */
-    protected postInitDiagram(
-        diagram: { diagramData: DiagramData; diagramElement: HTMLElement },
+    protected createDiagram(
+        diagramDescriptor: BaseDiagramDescriptor,
         container: HTMLElement,
-        sourceData: {
-            source: string;
-            lineStart: number;
-            lineEnd: number;
-        },
+        sourceData: SourceData,
         size: DiagramSize
     ): void {
-        const el = diagram.diagramElement;
-        this.diagram.state.initializeContainer(
-            container.id,
-            sourceData.source,
-            size
+        const diagram = DiagramFactory.createDiagram(
+            this.plugin,
+            diagramDescriptor,
+            sourceData,
+            size,
+            this.fileStat,
+            container
         );
+        this.emitCreated(diagram);
+    }
 
-        this.diagram.controlPanel.initialize(container, diagram.diagramData);
-        this.diagram.events.initialize(container, diagram.diagramData);
-        this.diagram.contextMenu.initialize(container, diagram.diagramData);
-        this.diagram.updateDiagramSize(container);
-        this.diagram.actions.fitToContainer(el, container);
+    private emitCreated(diagram: Diagram): void {
+        this.plugin.eventBus.emit('diagram.created', diagram);
     }
 }

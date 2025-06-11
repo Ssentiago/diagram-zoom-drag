@@ -1,12 +1,15 @@
-import { ControlPanel, TriggerType } from '../control-panel';
+import { ControlPanel } from '../control-panel';
 import { updateButton } from '../helpers/helpers';
 import { EventID } from '../../../events-management/typing/constants';
 import { FoldStateChanged } from '../../../events-management/typing/interface';
 import { BasePanel } from './base-panel';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
+import { IControlPanel } from '../typing/interfaces';
+import { TriggerType } from '../../typing/constants';
+import { updateDiagramSize } from '../../helpers';
 
 export class FoldPanel extends BasePanel {
-    constructor(public readonly controlPanel: ControlPanel) {
+    constructor(public readonly controlPanel: IControlPanel) {
         super(controlPanel);
     }
 
@@ -34,7 +37,7 @@ export class FoldPanel extends BasePanel {
      * This method creates the HTML element of the fold panel and assigns it to the `panel` property.
      */
     initialize(): void {
-        this.panel = this.createPanel();
+        super.initialize();
     }
 
     getButtons(): Array<{
@@ -70,9 +73,7 @@ export class FoldPanel extends BasePanel {
      *
      * @returns The HTML element of the fold panel.
      */
-    createPanel(): HTMLElement {
-        const foldPanel = this.createPanelElement();
-
+    setupPanelContents(): void {
         const foldButtons = this.getButtons();
 
         foldButtons.forEach((button) => {
@@ -83,23 +84,38 @@ export class FoldPanel extends BasePanel {
                 true,
                 button.id
             );
-            foldPanel.appendChild(btn);
+            this.panel.appendChild(btn);
         });
-
-        return foldPanel;
     }
 
     fold() {
         this.diagram.container.setAttribute('data-folded', 'true');
+        updateDiagramSize(
+            this.diagram.container,
+            this.diagram.diagramDescriptor.size,
+            this.diagram.plugin.settings.data.diagrams.size,
+            this.diagram.plugin.isInLivePreviewMode
+        );
         this.controlPanel.hide(TriggerType.FOLD);
     }
 
     unfold() {
         this.diagram.container.setAttribute('data-folded', 'false');
+        updateDiagramSize(
+            this.diagram.container,
+            this.diagram.diagramDescriptor.size,
+            this.diagram.plugin.settings.data.diagrams.size,
+            this.diagram.plugin.isInLivePreviewMode
+        );
         this.controlPanel.show(TriggerType.FOLD);
     }
 
     protected get supportedTriggers(): number {
-        return super.supportedTriggers & ~TriggerType.FOLD;
+        return (
+            super.supportedTriggers &
+            ~TriggerType.FOLD &
+            ~TriggerType.SERVICE_HIDING &
+            ~TriggerType.FOCUS
+        );
     }
 }

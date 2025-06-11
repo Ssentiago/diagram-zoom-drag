@@ -1,5 +1,5 @@
 import { MarkdownView, WorkspaceLeaf } from 'obsidian';
-import { LeafID } from '../diagram/state/typing/types';
+import { LeafID } from './state';
 
 interface IPluginContext {
     leaf: WorkspaceLeaf | undefined;
@@ -17,7 +17,7 @@ export class PluginContext implements IPluginContext {
      * @returns The ID of the workspace leaf as a string if the leaf exists,
      * or `undefined` if no leaf is present.
      */
-    get leafID(): undefined | string {
+    get leafID(): undefined | LeafID {
         return this.leaf && (this.leaf.id as LeafID);
     }
 

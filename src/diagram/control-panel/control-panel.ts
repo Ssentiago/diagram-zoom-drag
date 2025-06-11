@@ -3,21 +3,10 @@ import { ZoomPanel } from './panels/zoom';
 import { FoldPanel } from './panels/fold';
 import { ServicePanel } from './panels/service';
 import Diagram from 'diagram/diagram';
-import { PanelsTriggering } from '../../settings/typing/interfaces';
+import { IControlPanel } from './typing/interfaces';
+import { TriggerType } from '../typing/constants';
 
-interface ControlPanelExternalImpact {
-    containerHovered: boolean;
-}
-
-export enum TriggerType {
-    MOUSE = 1 << 0,
-    FOCUS = 1 << 1,
-    KEYPRESS = 1 << 2,
-    FOLD = 1 << 3,
-    FORCE = 1 << 4,
-}
-
-export class ControlPanel {
+export class ControlPanel implements IControlPanel {
     fold!: FoldPanel;
     move!: MovePanel;
     zoom!: ZoomPanel;
@@ -46,9 +35,12 @@ export class ControlPanel {
     }
 
     private initializePanels(): void {
-        [this.move, this.zoom, this.fold, this.service].forEach((panel) =>
-            panel.initialize()
-        );
+        [this.move, this.zoom, this.fold, this.service].forEach((panel) => {
+            if (panel instanceof ServicePanel) {
+                debugger;
+            }
+            panel.initialize();
+        });
     }
 
     private attachToContainer(): void {

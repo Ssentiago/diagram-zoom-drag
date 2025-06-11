@@ -1,7 +1,8 @@
 import Events, { Handler } from '../events';
 import { FoldStateChanged } from '../../../events-management/typing/interface';
 import { EventID } from '../../../events-management/typing/constants';
-import { TriggerType } from '../../control-panel/control-panel';
+
+import { TriggerType } from '../../typing/constants';
 
 export class FocusHandler implements Handler {
     constructor(private readonly events: Events) {}
@@ -40,7 +41,7 @@ export class FocusHandler implements Handler {
             this.events.diagram.plugin.settings.data.diagrams.folding
                 .autoFoldOnFocusChange
         ) {
-            this.events.diagram.controlPanel.fold.fold();
+            this.events.diagram.controlPanel.fold.unfold();
         }
         this.events.diagram.controlPanel.show(TriggerType.FOCUS);
     }

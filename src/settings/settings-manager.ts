@@ -136,7 +136,7 @@ export default class SettingsManager {
             diagrams: {
                 folding: {
                     foldByDefault: false,
-                    autoFoldOnFocusChange: true,
+                    autoFoldOnFocusChange: false,
                 },
                 settingsPagination: {
                     perPage: 5,
