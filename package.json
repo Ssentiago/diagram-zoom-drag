@@ -65,6 +65,7 @@
         "react-dom": "^19.1.0",
         "react-obsidian-setting": "^1.0.41",
         "react-router-dom": "^7.6.2",
+        "react-transition-group": "^4.4.5",
         "styled-components": "^6.1.18",
         "uuid": "^11.1.0"
     },

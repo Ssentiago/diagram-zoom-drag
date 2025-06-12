@@ -24,7 +24,6 @@ async function isObsidianRunning() {
 async function startObsidian() {
     const isRunning = await isObsidianRunning();
     if (isRunning) {
-        console.log('Obsidian is already running.');
         return;
     }
 
@@ -38,7 +37,6 @@ async function startObsidian() {
     );
 
     cp.unref();
-    console.log('Obsidian started in debugging mode at port 9222.');
 }
 
 startObsidian().catch((err) => {

@@ -40,7 +40,6 @@ export class ControlPanel extends Component {
     private initializePanels(): void {
         [this.move, this.zoom, this.fold, this.service].forEach((panel) => {
             if (panel instanceof ServicePanel) {
-                debugger;
             }
             panel.initialize();
         });

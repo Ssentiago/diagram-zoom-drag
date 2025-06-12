@@ -1020,7 +1020,7 @@ var isPrivateRepo = async (
         const data = await JSON.parse(response);
         return data.private;
     } catch (e) {
-        if (debugLogging) console.log('error in isPrivateRepo', URL2, e);
+        if (debugLogging);
         return false;
     }
 };
@@ -1085,8 +1085,7 @@ var grabReleaseFileFromRepository = async (
                 : download;
         }
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabReleaseFileFromRepository', URL, error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1118,14 +1117,14 @@ var grabManifestJsonFromRepository = async (
             });
             return true;
         } catch (error) {
-            if (debugLogging) console.log('Token validation error:', error);
+            if (debugLogging);
             return false;
         }
     };
     let tokenValid = false;
     if (personalAccessToken) {
         tokenValid = await isTokenValid(personalAccessToken);
-        if (debugLogging) console.log('Token valid:', tokenValid);
+        if (debugLogging);
     }
     try {
         const response = await (0, import_obsidian.request)({
@@ -1136,8 +1135,7 @@ var grabManifestJsonFromRepository = async (
                   }
                 : {},
         });
-        if (debugLogging)
-            console.log('grabManifestJsonFromRepository response', response);
+        if (debugLogging);
         return response === '404: Not Found'
             ? null
             : await JSON.parse(response);
@@ -1161,8 +1159,7 @@ var grabCommmunityPluginList = async (debugLogging = true) => {
             ? null
             : await JSON.parse(response);
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabCommmunityPluginList', error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1174,8 +1171,7 @@ var grabCommmunityThemesList = async (debugLogging = true) => {
             ? null
             : await JSON.parse(response);
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabCommmunityThemesList', error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1189,8 +1185,7 @@ var grabCommmunityThemeCssFile = async (
         const response = await (0, import_obsidian.request)({ url: themesUrl });
         return response === '404: Not Found' ? null : response;
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabCommmunityThemeCssFile', error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1203,8 +1198,7 @@ var grabCommmunityThemeManifestFile = async (
         const response = await (0, import_obsidian.request)({ url: themesUrl });
         return response === '404: Not Found' ? null : response;
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabCommmunityThemeManifestFile', error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1240,8 +1234,7 @@ var grabLastCommitInfoForFile = async (
         const response = await (0, import_obsidian.request)({ url });
         return response === '404: Not Found' ? null : JSON.parse(response);
     } catch (error) {
-        if (debugLogging)
-            console.log('error in grabLastCommitInfoForAFile', error);
+        if (debugLogging);
         return null;
     }
 };
@@ -1429,7 +1422,6 @@ var themeSave = async (plugin, cssGithubRepository, newInstall) => {
 };
 var themesCheckAndUpdates = async (plugin, showInfo) => {
     if (!(await isConnectedToInternet())) {
-        console.log('BRAT: No internet detected.');
         return;
     }
     let newNotice;
@@ -1453,7 +1445,7 @@ ${msg1}`,
                 false,
                 plugin.settings.debuggingMode
             );
-        console.log('BRAT: lastUpdateOnline', lastUpdateOnline);
+
         if (lastUpdateOnline !== t.lastUpdate)
             await themeSave(plugin, t.repo, false);
     }
@@ -2123,7 +2115,7 @@ The version attribute for the release is missing from the manifest file`,
         const version =
             specifyVersion === '' ? manifest.version : specifyVersion;
         const reallyGetManifestOrNot = getManifest || specifyVersion !== '';
-        console.log({ reallyGetManifestOrNot, version });
+
         return {
             mainJs: await grabReleaseFileFromRepository(
                 repositoryPath,
@@ -2268,11 +2260,10 @@ You will need to update your Obsidian to use this plugin or contact the plugin d
                 usingBetaManifest,
                 specifyVersion
             );
-            console.log('rFiles', rFiles);
+
             if (usingBetaManifest || rFiles.manifest === '')
                 rFiles.manifest = JSON.stringify(primaryManifest);
-            if (this.plugin.settings.debuggingMode)
-                console.log('BRAT: rFiles.manifest', usingBetaManifest, rFiles);
+            if (this.plugin.settings.debuggingMode);
             if (rFiles.mainJs === null) {
                 const msg = `${repositoryPath}
 The release is not complete and cannot be download. main.js is missing from the Release`;
@@ -2432,8 +2423,7 @@ Plugin has been updated from version ${localManifestJson.version} to ${primaryMa
             await plugins.disablePlugin(pluginName);
             await plugins.enablePlugin(pluginName);
         } catch (e) {
-            if (this.plugin.settings.debuggingMode)
-                console.log('reload plugin', e);
+            if (this.plugin.settings.debuggingMode);
         }
     }
     /**
@@ -2476,7 +2466,6 @@ Update of plugin failed.`
         onlyCheckDontUpdate = false
     ) {
         if (!(await isConnectedToInternet())) {
-            console.log('BRAT: No internet detected.');
             return;
         }
         let newNotice;
@@ -2562,7 +2551,7 @@ function addIcons() {
 var import_obsidian9 = require('obsidian');
 var import_obsidian_daily_notes_interface = __toESM(require_main());
 async function logger(plugin, textToLog, verboseLoggingOn = false) {
-    if (plugin.settings.debuggingMode) console.log('BRAT: ' + textToLog);
+    if (plugin.settings.debuggingMode);
     if (plugin.settings.loggingEnabled) {
         if (!plugin.settings.loggingVerboseEnabled && verboseLoggingOn) {
             return;
@@ -2828,8 +2817,7 @@ Plugin reloading .....`,
                             `${results.display} plugin disabled`,
                             false
                         );
-                        if (this.plugin.settings.debuggingMode)
-                            console.log(results.info);
+                        if (this.plugin.settings.debuggingMode);
                         void this.plugin.app.plugins.disablePluginAndSave(
                             results.info
                         );
@@ -3051,9 +3039,7 @@ Plugin reloading .....`,
 // src/utils/BratAPI.ts
 var BratAPI = class {
     constructor(plugin) {
-        this.console = (logDescription, ...outputs) => {
-            console.log('BRAT: ' + logDescription, ...outputs);
-        };
+        this.console = (logDescription, ...outputs) => {};
         this.themes = {
             themeseCheckAndUpates: async (showInfo) => {
                 await themesCheckAndUpdates(this.plugin, showInfo);
@@ -3133,7 +3119,6 @@ var ThePlugin = class extends import_obsidian11.Plugin {
         };
     }
     onload() {
-        console.log('loading ' + this.APP_NAME);
         this.loadSettings()
             .then(() => {
                 this.addSettingTab(new BratSettingsTab(this.app, this));
@@ -3173,9 +3158,7 @@ var ThePlugin = class extends import_obsidian11.Plugin {
     async log(textToLog, verbose = false) {
         await logger(this, textToLog, verbose);
     }
-    onunload() {
-        console.log('unloading ' + this.APP_NAME);
-    }
+    onunload() {}
     async loadSettings() {
         this.settings = Object.assign(
             {},

@@ -1,70 +1,48 @@
-import { useMemo, useState } from 'react';
+import { useSettingsContext } from '../../../../../core/SettingsContext';
+import { useEffect, useMemo, useState } from 'react';
 
-import { AnimationState } from '../typing/interfaces';
-
-interface UsePaginationProps {
-    totalItems: number;
+interface usePaginationProps {
     itemsPerPage: number;
-    editingIndex?: number;
-    currentPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    animationState: AnimationState;
-    setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
+    totalItems: number;
 }
 
 export const usePagination = ({
-    totalItems,
     itemsPerPage,
-    editingIndex,
-    currentPage,
-    setCurrentPage,
-    setAnimationState,
-}: UsePaginationProps) => {
+    totalItems,
+}: usePaginationProps) => {
+    const { plugin } = useSettingsContext();
+    const [page, setPage] = useState(1);
     const [delta, setDelta] = useState(0);
-    const [isSwitchConfirmOpen, setIsSwitchConfirmOpen] = useState(false);
-
     const totalPages = useMemo(
         () => Math.max(1, Math.ceil(totalItems / itemsPerPage)),
         [totalItems, itemsPerPage]
     );
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const pageStartIndex = useMemo(
+        () => (page - 1) * itemsPerPage,
+        [page, itemsPerPage]
+    );
+
+    const pageEndIndex = useMemo(
+        () => pageStartIndex + itemsPerPage,
+        [pageStartIndex, itemsPerPage]
+    );
+
+    useEffect(() => {
+        const newTotalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        setPage((prevPage) => Math.min(prevPage, newTotalPages));
+    }, [itemsPerPage, totalItems]);
 
     const navigateToPage = (delta: number) => {
-        setAnimationState({
-            type: 'page-change',
-            isTransition: true,
-        });
-        setTimeout(() => {
-            setCurrentPage((prev) => {
-                return Math.min(totalPages, Math.max(prev + delta, 1));
-            });
-            setAnimationState({
-                type: 'none',
-                isTransition: false,
-            });
-        }, 200);
+        setPage((prev) => Math.min(totalPages, Math.max(prev + delta, 1)));
     };
-    const changePage = (delta: number): void => {
-        if (editingIndex !== -1) {
-            setDelta(delta);
-            setIsSwitchConfirmOpen(true);
-        } else {
-            navigateToPage(delta);
-        }
-    };
-
-    const actualIndex = (index: number): number => startIndex + index;
 
     return {
-        totalPages,
-        startIndex,
-        endIndex,
-        changePage,
-        navigateToPage,
-        actualIndex,
+        page,
+        pageStartIndex,
+        pageEndIndex,
         delta,
-        isSwitchConfirmOpen,
-        setIsSwitchConfirmOpen,
+        setDelta,
+        totalPages,
+        navigateToPage,
     };
 };

@@ -3,7 +3,7 @@ import { useDiagramManagerContext } from '../context/diagramManagerContext';
 import { useEffect, useState } from 'react';
 import { DiagramData } from '../../../../../typing/interfaces';
 
-const diagramRegexp = /^[\w-]+$/;
+// const diagramRegexp = /^[\w-]+$/;
 
 export interface DiagramValidationResult {
     empty: boolean;
@@ -83,13 +83,13 @@ export const useDiagramValidation = () => {
             };
         }
 
-        if (!diagramRegexp.test(name)) {
-            return {
-                valid: false,
-                tooltip: 'Incorrect input. Should be only A-Za-z0-9-',
-                empty: false,
-            };
-        }
+        // if (!diagramRegexp.test(name)) {
+        //     return {
+        //         valid: false,
+        //         tooltip: 'Incorrect input. Should be only A-Za-z0-9-',
+        //         empty: false,
+        //     };
+        // }
 
         if (
             diagramNamesIndex.has(name) &&

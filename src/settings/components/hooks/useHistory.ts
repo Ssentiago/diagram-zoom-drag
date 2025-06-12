@@ -15,7 +15,6 @@ export interface UndoRedoApi<T> {
     canRedo: boolean;
     getRedoLabel: () => string;
     getUndoLabel: () => string;
-    setContext: (context: string) => void;
 }
 
 export const useHistory = <T extends readonly unknown[]>(
@@ -41,6 +40,8 @@ export const useHistory = <T extends readonly unknown[]>(
             currentState: state,
         };
     }, [undoStack, redoStack, undoDescription, redoDescription, state]);
+
+    useEffect(() => {}, [redoStack]);
 
     useEffect(() => {
         if (undoStack.length > 0) {
@@ -90,11 +91,6 @@ export const useHistory = <T extends readonly unknown[]>(
             plugin.settings.eventBus.off('settings-clear-history', handler);
         };
     }, []);
-    const [undoContext, setUndoContext] = useState('');
-
-    const setContext = (context: string) => {
-        setUndoContext(context);
-    };
 
     const updateUndoStack = (state: T, description: string) => {
         let newUndoStack: HistoryAction<T>[] = [...undoStack];
@@ -116,27 +112,6 @@ export const useHistory = <T extends readonly unknown[]>(
         setRedoStack(newRedoStack);
         setCanRedo(true);
     };
-
-    useEffect(() => {
-        const handler = async (payload: any) => {
-            const currentContext =
-                undoContext || payload.eventName.replace('settings.', '');
-            setUndoContext('');
-            updateUndoStack(payload.oldValue, currentContext);
-        };
-
-        plugin.settings.eventBus.on(
-            plugin.settings.events.diagrams.supported_diagrams.$path,
-            handler
-        );
-
-        return () => {
-            plugin.settings.eventBus.off(
-                plugin.settings.events.diagrams.supported_diagrams.$path,
-                handler
-            );
-        };
-    }, [undoContext]);
 
     const undo = async () => {
         if (undoStack.length > 0) {
@@ -222,6 +197,5 @@ export const useHistory = <T extends readonly unknown[]>(
         canRedo,
         getRedoLabel,
         getUndoLabel,
-        setContext,
     };
 };

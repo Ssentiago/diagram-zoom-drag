@@ -27,7 +27,6 @@ const PanelLayout: React.FC = () => {
 
     useEffect(() => {
         const handler = (p: any) => {
-            console.log(p);
             setUpdateTrigger((prev) => !prev);
         };
 

@@ -99,7 +99,6 @@ async function getNewVersion(
     });
 
     if (!answer.trim()) {
-        console.log('See you later!');
         process.exit(0);
     }
 
@@ -129,7 +128,6 @@ async function versionMenu(
     currentVersion: string
 ): Promise<string> {
     process.on('SIGINT', () => {
-        console.log('\nProcess terminated. Exiting gracefully...');
         process.exit(0);
     });
 
@@ -166,15 +164,12 @@ async function versionMenu(
         } else if (answer === '4') {
             return getNewVersion(previousVersions, currentVersion, false);
         } else if (answer === '5') {
-            console.log('Previous versions:');
-            console.log(`- ${previousVersions.join('\n- ')}`);
             await input({
                 message: 'Press Enter to go back to the menu...',
                 required: false,
                 transformer: () => '',
             });
         } else if (answer === '6') {
-            console.log('See you later!');
             process.exit(0);
         }
     }
@@ -225,7 +220,6 @@ async function setRelease() {
             case 'y':
                 break;
             case 'n':
-                console.log('See you later!');
                 process.exit(0);
             case 'r':
                 continue;
@@ -246,11 +240,8 @@ async function setRelease() {
         });
 
         if (!confirmContinue) {
-            console.log('See you later!');
             process.exit(0);
         }
-
-        console.log('Making git stuffs...');
 
         const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', {
             stdio: 'pipe',
@@ -270,7 +261,6 @@ async function setRelease() {
             if (confirmation) {
                 break;
             } else {
-                console.log('See you later!');
                 process.exit(0);
             }
         }

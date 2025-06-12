@@ -3,17 +3,14 @@ import { useSettingsContext } from '../../../../../core/SettingsContext';
 import { createSettingsProxy } from '../../../../../../settings-manager';
 
 import { useDiagramValidation } from '../../hooks/useDiagramValidation';
+import { useDiagramManagerContext } from '../../context/diagramManagerContext';
+import { useDiagramHistoryContext } from '../../context/HistoryContext';
 
-export const useDiagramOperations = (
-    diagrams: DiagramData[],
-    saveDiagrams: (diagrams: DiagramData[]) => Promise<void>,
-    updateUndoStack: (state: DiagramData[], desc: string) => void,
-    actualIndex: (index: number) => number,
-    editingIndex: number,
-    setEditingIndex: (index: number) => void
-) => {
+export const useDiagramOperations = () => {
     const { plugin } = useSettingsContext();
     const { validateBoth, processBothValidation } = useDiagramValidation();
+    const { diagrams, saveDiagrams } = useDiagramManagerContext();
+    const { updateUndoStack } = useDiagramHistoryContext();
 
     const handleDelete = async (index: number) => {
         const oldDiagrams = [...diagrams];
@@ -42,8 +39,7 @@ export const useDiagramOperations = (
         );
     };
 
-    const handleSaveEditing = async () => {
-        const index = actualIndex(editingIndex);
+    const handleSaveEditing = async (index: number) => {
         const oldDiagram = diagrams[index];
 
         const editingNameInput: HTMLInputElement | null =
@@ -75,7 +71,6 @@ export const useDiagramOperations = (
             await saveDiagrams([...diagrams]);
             editingNameInput.removeAttribute('id');
             editingSelectorInput.removeAttribute('id');
-            setEditingIndex(-1);
 
             const changes = [];
             if (nameChanged) {

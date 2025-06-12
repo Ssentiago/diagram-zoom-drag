@@ -10,7 +10,9 @@
 [View demo for Mobile](https://github.com/user-attachments/assets/9cdc743f-8c26-4151-9588-17ae086692ec)
 
 ### About the problem
-In Obsidian, when you have a Markdown file with large charts, diagrams, or Mermaid content, these elements may be too large to display fully within the Mermaid window. This plugin is designed to address that issue by allowing you to zoom in, zoom out, and drag the diagrams for better visibility and interaction. Enjoy!
+> In Obsidian, when you have a Markdown file with large charts, diagrams, or Mermaid content, these elements may be too large to display fully within the Mermaid window. This plugin is designed to address that issue by allowing you to zoom in, zoom out, and drag the diagrams for better visibility and interaction. Enjoy! 
+> <div align="right">— gitcpy</div>
+
 
 ### How to get it
 There are three options to install the plugin:

@@ -118,16 +118,21 @@ Partially replaces by Obsidian styles.
     padding: 5px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .diagram-zoom-drag-panel.visible {
     visibility: visible;
-    transition: opacity 0.5s ease;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .diagram-zoom-drag-panel.hidden {
     visibility: hidden;
-    transition: opacity 0.5s ease;
+    opacity: 0;
+    transform: translateY(10px);
     cursor: grab;
 }
 

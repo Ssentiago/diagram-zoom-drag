@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { DiagramData } from '../../../../../typing/interfaces';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
@@ -11,17 +11,20 @@ import {
 
 import { useDiagramValidation } from '../hooks/useDiagramValidation';
 import styled from 'styled-components';
+import { ModeState } from './AvailableDiagrams';
+import { useDiagramOperations } from './hooks/useDiagramOperations';
 
 interface DiagramItemProps {
     diagram: DiagramData;
+    // onToggle: (value: boolean) => void;
+    // onEdit: () => void;
+    // onSave: () => void;
+    // onDelete: () => void;
+    // onOptions: () => void;
+    // onCancel: () => void;
     index: number;
-    editingIndex: number;
-    setEditingIndex: (index: number) => void;
-    onToggle: (index: number, value: boolean) => Promise<void>;
-    onDelete: (index: number) => Promise<void>;
-    onSaveEditing: () => Promise<any>;
-    setIsDiagramOptionsOpen: (value: boolean) => void;
-    setOptionDiagramIndex: (index: number) => void;
+    modeState: ModeState;
+    setModeState: (modeState: ModeState) => void;
 }
 
 const EditingItemWrapper = styled.div``;
@@ -29,13 +32,8 @@ const EditingItemWrapper = styled.div``;
 export const DiagramItem: React.FC<DiagramItemProps> = ({
     diagram,
     index,
-    editingIndex,
-    setEditingIndex,
-    onToggle,
-    onDelete,
-    onSaveEditing,
-    setOptionDiagramIndex,
-    setIsDiagramOptionsOpen,
+    modeState,
+    setModeState,
 }) => {
     const {
         validateName,
@@ -43,6 +41,10 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
         processNameValidation,
         processSelectorValidation,
     } = useDiagramValidation();
+
+    const { handleSaveEditing, handleDelete, handleToggle } =
+        useDiagramOperations();
+
     const editingItemRef = useRef<HTMLDivElement>(null);
 
     const onKeyDown = async (e: React.KeyboardEvent) => {
@@ -56,12 +58,12 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                 !!editingItem.querySelector('input:focus');
             if (isAnyInputFocused) {
                 e.preventDefault();
-                await onSaveEditing();
+                await handleSaveEditing(index);
             }
         }
     };
 
-    return editingIndex === index ? (
+    return modeState.index === index && modeState.mode === 'edit' ? (
         <EditingItemWrapper onKeyDown={onKeyDown} ref={editingItemRef}>
             <ReactObsidianSetting
                 addTexts={[
@@ -97,7 +99,10 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                             'Cancel operation? All changes will be lost.'
                         );
                         button.onClick((cb) => {
-                            setEditingIndex(-1);
+                            setModeState({
+                                index: -1,
+                                mode: 'none',
+                            });
                         });
                         return button;
                     },
@@ -105,7 +110,11 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                         button.setIcon('save');
                         button.setTooltip(`Save changes for ${diagram.name}?`);
                         button.onClick(async (cb) => {
-                            await onSaveEditing();
+                            await handleSaveEditing(index);
+                            setModeState({
+                                index: -1,
+                                mode: 'none',
+                            });
                         });
                         return button;
                     },
@@ -122,7 +131,9 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                     toggle.setTooltip(
                         `${diagram.on ? 'Disable' : 'Enable'} ${diagram.name} diagram`
                     );
-                    toggle.onChange(async (value) => onToggle(index, value));
+                    toggle.onChange(async (value) => {
+                        await handleToggle(index, value);
+                    });
                     return toggle;
                 },
             ]}
@@ -132,7 +143,10 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                         button.setIcon('edit');
                         button.setTooltip(`Edit ${diagram.name} diagram`);
                         button.onClick(async () => {
-                            setEditingIndex(index);
+                            setModeState({
+                                index,
+                                mode: 'edit',
+                            });
                         });
                         return button;
                     }),
@@ -141,7 +155,7 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                         button.setIcon('trash');
                         button.setTooltip(`Delete ${diagram.name} diagram`);
                         button.onClick(async () => {
-                            await onDelete(index);
+                            await handleDelete(index);
                         });
                         return button;
                     }),
@@ -150,8 +164,10 @@ export const DiagramItem: React.FC<DiagramItemProps> = ({
                 (button: ExtraButtonComponent): ExtraButtonComponent => {
                     button.setTooltip(`Options for ${diagram.name} diagram`);
                     button.onClick(() => {
-                        setOptionDiagramIndex(index);
-                        setIsDiagramOptionsOpen(true);
+                        setModeState({
+                            index,
+                            mode: 'options',
+                        });
                     });
                     return button;
                 },

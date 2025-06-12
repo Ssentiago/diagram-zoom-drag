@@ -2,8 +2,10 @@ import { ReactObsidianSetting } from 'react-obsidian-setting';
 import React from 'react';
 import SizeDimensionsOption from './DimensionsOption';
 import { ComponentType } from './typing/Size.constants';
+import { useSettingsContext } from '../../../../core/SettingsContext';
 
 const Size: React.FC = () => {
+    const { plugin } = useSettingsContext();
     return (
         <>
             <ReactObsidianSetting
@@ -17,8 +19,14 @@ const Size: React.FC = () => {
                 setHeading={true}
             />
 
-            <SizeDimensionsOption type={ComponentType.Expanded} />
-            <SizeDimensionsOption type={ComponentType.Folded} />
+            <SizeDimensionsOption
+                type={ComponentType.Expanded}
+                initialOptions={plugin.settings.data.diagrams.size.expanded}
+            />
+            <SizeDimensionsOption
+                type={ComponentType.Folded}
+                initialOptions={plugin.settings.data.diagrams.size.folded}
+            />
         </>
     );
 };

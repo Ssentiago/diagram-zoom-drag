@@ -10,9 +10,14 @@ import { useSettingsContext } from '../../../../core/SettingsContext';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
 import DiagramZoomDragPlugin from '../../../../../../core/diagram-zoom-drag-plugin';
 import { Notice, setTooltip, TextComponent } from 'obsidian';
+import { DefaultSettings } from '../../../../../typing/interfaces';
+import { prefix } from 'stylis';
 
 interface DimensionsOption {
     type: ComponentType;
+    initialOptions:
+        | DefaultSettings['diagrams']['size']['folded']
+        | DefaultSettings['diagrams']['size']['expanded'];
 }
 
 type DimensionUnit = keyof typeof dimensionSpec;
@@ -32,10 +37,6 @@ const dimensionSpec = {
     },
 };
 
-const getMinMaxByUnit = (unit: DimensionUnit) => ({
-    min: dimensionSpec[unit].min.toString(),
-    max: dimensionSpec[unit].max.toString(),
-});
 const getRangeMessage = (unit: DimensionUnit) =>
     dimensionSpec[unit].rangeMessage;
 const isDimensionInValidRange = (
@@ -47,43 +48,28 @@ const isDimensionInValidRange = (
     return n >= min && n <= max;
 };
 
-function useDiagramSizeSettings(
-    plugin: DiagramZoomDragPlugin,
-    type: ComponentType
-) {
-    const settingsSource = useMemo(
-        () =>
-            type === ComponentType.Expanded
-                ? plugin.settings.data.diagrams.size.expanded
-                : plugin.settings.data.diagrams.size.folded,
-        [plugin.settings.data, type]
-    );
-
-    const [height, setHeight] = useState(settingsSource.height);
-    const [width, setWidth] = useState(settingsSource.width);
-
-    const prefix = type === ComponentType.Folded ? 'Folded' : 'Expanded';
-
-    return {
-        height,
-        setHeight,
-        width,
-        setWidth,
-        prefix,
-        settingsSource,
-    };
-}
 const getErrorMessage = (field: 'width' | 'height', unit: DimensionUnit) =>
     `Invalid ${field}. Please enter number in range ${getRangeMessage(unit)}.`;
 
-const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
+const SizeDimensionsOption: React.FC<DimensionsOption> = ({
+    type,
+    initialOptions,
+}) => {
     const { plugin } = useSettingsContext();
     const hasValidationErrorsRef = useRef(false);
 
-    const { height, setHeight, width, setWidth, prefix } =
-        useDiagramSizeSettings(plugin, type);
+    const [heightUnit, setHeightUnit] = useState(initialOptions.height.unit);
+    const [widthUnit, setWidthUnit] = useState(initialOptions.width.unit);
+
+    const heightValueRef = useRef(initialOptions.height.value);
+    const widthValueRef = useRef(initialOptions.width.value);
 
     const inputsRef = useRef<HTMLDivElement>(null);
+
+    const prefix = useMemo(
+        () => (type === ComponentType.Folded ? 'Folded' : 'Expanded'),
+        [type]
+    );
 
     const validateDimensionInput = useCallback(
         (
@@ -111,32 +97,30 @@ const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
         widthInput: HTMLInputElement,
         heightInput: HTMLInputElement
     ) => {
-        const widthValid = isDimensionInValidRange(
-            widthInput.value,
-            width.unit
-        );
+        const widthValid = isDimensionInValidRange(widthInput.value, widthUnit);
         const heightValid = isDimensionInValidRange(
             heightInput.value,
-            height.unit
+            heightUnit
         );
         return widthValid && heightValid;
     };
 
     useEffect(() => {
+        const widthInput = inputsRef.current?.querySelector(
+            '#input-width'
+        ) as HTMLInputElement | null;
         const heightInput = inputsRef.current?.querySelector(
             '#input-height'
         ) as HTMLInputElement | null;
-        const widthInput = inputsRef.current?.querySelector(
-            '#width-height'
-        ) as HTMLInputElement | null;
+
+        if (widthInput?.value) {
+            validateDimensionInput(widthInput, 'width', widthUnit);
+        }
 
         if (heightInput?.value) {
-            validateDimensionInput(heightInput, 'height', height.unit);
+            validateDimensionInput(heightInput, 'height', heightUnit);
         }
-        if (widthInput?.value) {
-            validateDimensionInput(widthInput, 'width', width.unit);
-        }
-    }, [height.unit, width.unit]);
+    }, [widthUnit, heightUnit]);
 
     const handleSave = async () => {
         if (!inputsRef.current) {
@@ -160,20 +144,25 @@ const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
         const inputWidth = parseInt(widthInput.value, 10);
         const inputHeight = parseInt(heightInput.value, 10);
 
-        if (inputWidth === width.value && inputHeight === height.value) {
+        if (
+            inputWidth === initialOptions.width.value &&
+            inputHeight === initialOptions.height.value &&
+            widthUnit === initialOptions.width.unit &&
+            heightUnit === initialOptions.height.unit
+        ) {
             plugin.showNotice('Nothing to save');
             return;
         }
 
-        width.value = inputWidth;
-        height.value = inputHeight;
+        initialOptions.width.value = inputWidth;
+        initialOptions.height.value = inputHeight;
+        initialOptions.width.unit = widthUnit;
+        initialOptions.height.unit = heightUnit;
 
         if (type === ComponentType.Folded) {
-            plugin.settings.data.diagrams.size.folded.height = height;
-            plugin.settings.data.diagrams.size.folded.width = width;
+            plugin.settings.data.diagrams.size.folded = initialOptions;
         } else {
-            plugin.settings.data.diagrams.size.expanded.height = height;
-            plugin.settings.data.diagrams.size.expanded.width = width;
+            plugin.settings.data.diagrams.size.expanded = initialOptions;
         }
 
         await plugin.settings.saveSettings();
@@ -220,15 +209,19 @@ const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
                             const label = document.createElement('label');
                             label.textContent = 'Height:';
                             parent.insertBefore(label, inputHeight.inputEl);
-                            inputHeight.setValue(height.value.toString());
+                            inputHeight.setValue(
+                                heightValueRef.current.toString()
+                            );
                             inputHeight.setPlaceholder('height');
                             inputHeight.onChange((value) => {
-                                inputHeight.setValue(value.replace(/\D/, ''));
+                                const replaced = value.replace(/\D/, '');
+                                inputHeight.setValue(replaced);
+                                heightValueRef.current = parseInt(replaced, 10);
 
                                 validateDimensionInput(
                                     inputHeight.inputEl,
                                     'height',
-                                    height.unit
+                                    heightUnit
                                 );
                             });
                             return inputHeight;
@@ -241,15 +234,19 @@ const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
                             label.textContent = 'Width:';
                             wrapper.insertBefore(label, inputWidth.inputEl);
 
-                            inputWidth.setValue(width.value.toString());
+                            inputWidth.setValue(
+                                widthValueRef.current.toString()
+                            );
                             inputWidth.setPlaceholder('width');
                             inputWidth.onChange((value) => {
-                                inputWidth.setValue(value.replace(/\D/, ''));
+                                const replaced = value.replace(/\D/, '');
+                                inputWidth.setValue(replaced);
+                                widthValueRef.current = parseInt(replaced, 10);
 
                                 validateDimensionInput(
                                     inputWidth.inputEl,
                                     'width',
-                                    width.unit
+                                    widthUnit
                                 );
                             });
                             return inputWidth;
@@ -258,21 +255,17 @@ const SizeDimensionsOption: React.FC<DimensionsOption> = ({ type }) => {
                     addDropdowns={[
                         (dropdown) => {
                             dropdown.addOptions({ px: 'px', '%': '%' });
-                            dropdown.setValue(height.unit);
+                            dropdown.setValue(heightUnit);
                             dropdown.onChange((value) => {
-                                setHeight({
-                                    ...height,
-                                    unit: value as DimensionUnit,
-                                });
+                                setHeightUnit(value as DimensionUnit);
                             });
                             return dropdown;
                         },
                         (dropdown) => {
                             dropdown.addOptions({ px: 'px', '%': '%' });
-                            dropdown.setValue(width.unit);
+                            dropdown.setValue(widthUnit);
                             dropdown.onChange((value) => {
-                                const newUnit = value as DimensionUnit;
-                                setHeight({ ...height, unit: newUnit });
+                                setWidthUnit(value as DimensionUnit);
                             });
                             return dropdown;
                         },

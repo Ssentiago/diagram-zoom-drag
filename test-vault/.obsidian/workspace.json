@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "a98f782c3a3cf60f",
+        "id": "0e1c120f8029324e",
         "type": "tabs",
         "children": [
           {
-            "id": "021571a29bdafa57",
+            "id": "d2dd2b995723397b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "simple mermaid.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "simple mermaid"
+              "title": "New tab"
             }
           }
         ]
@@ -78,7 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 297.5
   },
   "right": {
     "id": "9cd10ca0cce07af7",
@@ -166,15 +162,16 @@
       "obsidian-mobile-emulator-toggle:Switch to PC emulation": false
     }
   },
-  "active": "021571a29bdafa57",
+  "active": "46b953f1233777c4",
   "lastOpenFiles": [
-    "mehrmaid.md",
     "simple mermaid.md",
+    "huge plantuml.md",
+    "graphviz.md",
+    "mehrmaid.md",
     "three simple mermaids.md",
     "two simple mermaid and one huge.md",
     "very huge mermaid.md",
     "one huge mermaid and two mehrmaids.md",
-    "huge plantuml.md",
     "many huge mermaids.md"
   ]
 }

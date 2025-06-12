@@ -1,116 +1,63 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSettingsContext } from '../../../../core/SettingsContext';
+import { ReactObsidianSetting } from 'react-obsidian-setting';
+import { useDiagramManagerContext } from '../context/diagramManagerContext';
+
+import { ArrowLeft, ArrowRight, RotateCcw, RotateCw } from 'lucide-react';
+import { DiagramItem } from './DiagramItem';
+import { useDiagramHistoryContext } from '../context/HistoryContext';
+import { DiagramOptionsModal } from './modals/DiagramOptionsModal';
+import { usePagination } from './hooks/usePagination';
 import {
     ButtonContainer,
-    DiagramContainer,
     PaginationButton,
     PaginationControls,
     RedoButton,
     UndoButton,
 } from './AvailableDiagrams.styled';
-import { SwitchPageConfirmModal } from './modals/SwitchPageConfirmModal';
-import { DiagramOptionsModal } from './modals/DiagramOptionsModal';
-import { ReactObsidianSetting } from 'react-obsidian-setting';
-import { ArrowLeft, ArrowRight, RotateCcw, RotateCw } from 'lucide-react';
-import { usePagination } from './hooks/usePagination';
-import { useDiagramOperations } from './hooks/useDiagramOperations';
-import { DiagramItem } from './DiagramItem';
-import { useDiagramHistoryContext } from '../context/HistoryContext';
-import { useDiagramManagerContext } from '../context/diagramManagerContext';
-import { AnimationState } from './typing/interfaces';
+
+export type mode = 'options' | 'edit' | 'none';
+
+export interface ModeState {
+    mode: mode;
+    index: number;
+    data?: {
+        [key: string]: any;
+    };
+}
 
 const AvailableDiagrams: React.FC = () => {
     const { plugin } = useSettingsContext();
-
-    const [editingIndex, setEditingIndex] = useState(-1);
-    const [currentPage, setCurrentPage] = useState(1);
     const [diagramsPerPage, setDiagramsPerPage] = useState(
         plugin.settings.data.diagrams.settingsPagination.perPage
     );
-
-    const { diagrams, saveDiagrams } = useDiagramManagerContext();
-
-    const [pendingDiagrams, setPendingDiagrams] = useState(diagrams);
-    const [pendingItemsPerPage, setPendingItemsPerPage] =
-        useState(diagramsPerPage);
-
-    const [isDiagramOptionsOpen, setIsDiagramOptionsOpen] = useState(false);
-    const [optionDiagramIndex, setOptionDiagramIndex] = useState(-1);
-
-    const [animationState, setAnimationState] = useState<AnimationState>({
-        type: 'none',
-        isTransition: false,
+    const { diagrams } = useDiagramManagerContext();
+    const [modeState, setModeState] = useState<ModeState>({
+        mode: 'none',
+        index: -1,
     });
+
+    const { navigateToPage, totalPages, pageStartIndex, pageEndIndex, page } =
+        usePagination({
+            itemsPerPage: diagramsPerPage,
+            totalItems: diagrams.length,
+        });
 
     const {
         updateUndoStack,
         undo,
         canUndo,
-        redo,
         canRedo,
         getRedoLabel,
+        redo,
         getUndoLabel,
     } = useDiagramHistoryContext();
 
-    const {
-        navigateToPage,
-        totalPages,
-        changePage,
-        actualIndex,
-        delta,
-        isSwitchConfirmOpen,
-        setIsSwitchConfirmOpen,
-    } = usePagination({
-        itemsPerPage: pendingItemsPerPage,
-        totalItems: pendingDiagrams.length,
-        currentPage,
-        setCurrentPage,
-        editingIndex,
-        animationState,
-        setAnimationState,
-    });
-
-    const { handleToggle, handleDelete, handleSaveEditing } =
-        useDiagramOperations(
-            diagrams,
-            saveDiagrams,
-            updateUndoStack,
-            actualIndex,
-            editingIndex,
-            setEditingIndex
-        );
-
     useEffect(() => {
         const handler = async () => {
-            const newDiagramsPerPage =
-                plugin.settings.data.diagrams.settingsPagination.perPage;
-            const oldTotalPages = Math.max(
-                1,
-                Math.ceil(pendingDiagrams.length / diagramsPerPage)
+            setDiagramsPerPage(
+                plugin.settings.data.diagrams.settingsPagination.perPage
             );
-            const newTotalPages = Math.max(
-                1,
-                Math.ceil(pendingDiagrams.length / newDiagramsPerPage)
-            );
-
-            const shouldAnimate =
-                oldTotalPages !== newTotalPages || currentPage > newTotalPages;
-
-            if (shouldAnimate) {
-                setAnimationState({ ...animationState, type: 'layout-change' });
-            }
-
-            setDiagramsPerPage(newDiagramsPerPage);
-            setPendingItemsPerPage(newDiagramsPerPage);
-            setCurrentPage((prev) => Math.min(prev, newTotalPages));
-
-            if (shouldAnimate) {
-                setTimeout(
-                    () =>
-                        setAnimationState({ ...animationState, type: 'none' }),
-                    250
-                );
-            }
         };
 
         plugin.settings.eventBus.on(
@@ -124,71 +71,30 @@ const AvailableDiagrams: React.FC = () => {
                 handler
             );
         };
-    }, [pendingDiagrams.length, diagramsPerPage, currentPage]);
-
-    const onSwitchConfirmSubmit = async (action: 'Yes' | 'No' | 'Save') => {
-        switch (action) {
-            case 'Yes':
-                setEditingIndex(-1);
-                navigateToPage(delta);
-                break;
-            case 'Save':
-                const validated = !!(await handleSaveEditing());
-                if (!validated) {
-                    return;
-                }
-                navigateToPage(delta);
-                break;
-        }
-    };
-
-    useEffect(() => {
-        if (diagrams !== pendingDiagrams && !animationState.isTransition) {
-            setAnimationState({ ...animationState, type: 'content-change' });
-
-            setTimeout(() => {
-                setPendingDiagrams(diagrams);
-                setAnimationState({ ...animationState, type: 'none' });
-            }, 200);
-        } else if (!animationState.isTransition) {
-            setPendingDiagrams(diagrams);
-        }
-    }, [diagrams, pendingDiagrams, animationState]);
+    }, [plugin]);
 
     const visibleDiagrams = useMemo(() => {
-        const itemsPerPage = pendingItemsPerPage;
-        const startIdx = (currentPage - 1) * itemsPerPage;
-        const endIdx = startIdx + itemsPerPage;
-        return pendingDiagrams.slice(startIdx, endIdx);
-    }, [pendingDiagrams, currentPage, pendingItemsPerPage]);
+        return diagrams.slice(pageStartIndex, pageEndIndex);
+    }, [diagrams, pageStartIndex, pageEndIndex]);
 
     const getPageChangeButtonLabel = (type: 'previous' | 'next') => {
-        let msg;
-        switch (type) {
-            case 'next':
-                msg =
-                    currentPage < totalPages
-                        ? 'Go to next page'
-                        : 'No next page';
-                break;
-            case 'previous':
-                msg =
-                    currentPage > 1
-                        ? 'Go to previous page'
-                        : 'No previous page';
-                break;
-        }
-        msg = editingIndex !== -1 ? `${msg} (confirm?)` : msg;
+        const canChange = type === 'next' ? page < totalPages : page > 1;
+        const base = canChange ? `Go to ${type} page` : `No ${type} page`;
+        const isOccupied = modeState.mode === 'edit';
 
-        return msg;
+        if (isOccupied && canChange) {
+            return `Can't change page while editing`;
+        }
+
+        return base;
     };
 
     return (
         <>
             <ReactObsidianSetting name="Available diagrams" setHeading />
-
             <ReactObsidianSetting
                 name="Diagrams per page"
+                setDisabled={modeState.mode === 'edit'}
                 addSliders={[
                     (slider) => {
                         slider.setValue(
@@ -217,16 +123,18 @@ const AvailableDiagrams: React.FC = () => {
 
                 <PaginationControls>
                     <PaginationButton
-                        onClick={() => changePage(-1)}
-                        disabled={currentPage === 1}
+                        onClick={() => navigateToPage(-1)}
+                        disabled={page === 1 || modeState.mode === 'edit'}
                         aria-label={getPageChangeButtonLabel('previous')}
                     >
                         <ArrowLeft size={'20px'} />
                     </PaginationButton>
-                    {`Page ${currentPage} of ${totalPages} (Total diagrams: ${pendingDiagrams.length})`}
+                    {`Page ${page} of ${totalPages} (Total diagrams: ${diagrams.length})`}
                     <PaginationButton
-                        onClick={() => changePage(1)}
-                        disabled={currentPage === totalPages}
+                        onClick={() => navigateToPage(1)}
+                        disabled={
+                            page === totalPages || modeState.mode === 'edit'
+                        }
                         aria-label={getPageChangeButtonLabel('next')}
                     >
                         <ArrowRight size={'20px'} />
@@ -241,39 +149,25 @@ const AvailableDiagrams: React.FC = () => {
                     <RotateCw size={'20px'} />
                 </RedoButton>
             </ButtonContainer>
-            <DiagramContainer animationType={animationState.type}>
-                {visibleDiagrams.map((diagram, index) => {
-                    const { name, selector } = diagram;
-                    return (
-                        <DiagramItem
-                            key={`${name}-${selector}-${index}`}
-                            diagram={diagram}
-                            editingIndex={editingIndex}
-                            index={actualIndex(index)}
-                            setEditingIndex={setEditingIndex}
-                            onToggle={handleToggle}
-                            onDelete={handleDelete}
-                            onSaveEditing={handleSaveEditing}
-                            setIsDiagramOptionsOpen={setIsDiagramOptionsOpen}
-                            setOptionDiagramIndex={setOptionDiagramIndex}
-                        />
-                    );
-                })}
-            </DiagramContainer>
-
-            {isSwitchConfirmOpen && (
-                <SwitchPageConfirmModal
-                    diagramName={diagrams[actualIndex(editingIndex)].name}
-                    onClose={() => setIsSwitchConfirmOpen(false)}
-                    onSubmit={onSwitchConfirmSubmit}
+            {visibleDiagrams.map((diagram, index) => (
+                <DiagramItem
+                    key={`${diagram.name}-${diagram.selector}`}
+                    diagram={diagram}
+                    index={pageStartIndex + index}
+                    modeState={modeState}
+                    setModeState={setModeState}
                 />
-            )}
-            {isDiagramOptionsOpen && (
+            ))}
+
+            {modeState.mode === 'options' && modeState.index !== -1 && (
                 <DiagramOptionsModal
-                    diagramIndex={optionDiagramIndex}
+                    diagramIndex={modeState.index}
                     onChanges={updateUndoStack}
                     onClose={() => {
-                        setIsDiagramOptionsOpen(false);
+                        setModeState({
+                            mode: 'none',
+                            index: -1,
+                        });
                     }}
                 />
             )}
