@@ -1,8 +1,8 @@
 import { ReactObsidianSetting } from 'react-obsidian-setting';
 import React, { useEffect, useRef } from 'react';
-import LayoutModal from './components/modals/LayoutModal';
+import LayoutModal from './modals/LayoutModal';
 import { useSettingsContext } from '../../../core/SettingsContext';
-import ButtonManagementModal from './components/modals/ButtonManagementModal';
+import ButtonManagementModal from './modals/ButtonManagementModal';
 
 const UI_PRIORITY = {
     TOGGLE: 1,

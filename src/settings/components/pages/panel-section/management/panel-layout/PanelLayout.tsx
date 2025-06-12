@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSettingsContext } from '../../../../../core/SettingsContext';
+import { useSettingsContext } from '../../../../core/SettingsContext';
 import {
     DiagramPreview,
     DiagramSetup,
@@ -8,7 +8,7 @@ import {
     PanelPreview,
     PanelToggle,
 } from './PanelLayout.styled';
-import { Panels, PanelsConfig } from '../../../../../../typing/interfaces';
+import { Panels, PanelsConfig } from '../../../../../typing/interfaces';
 import useDragDrop from './hooks/useDragDrop';
 
 const PanelLayout: React.FC = () => {

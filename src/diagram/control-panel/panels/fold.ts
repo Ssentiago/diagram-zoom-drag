@@ -1,9 +1,4 @@
-import { ControlPanel } from '../control-panel';
-import { updateButton } from '../helpers/helpers';
-import { EventID } from '../../../events-management/typing/constants';
-import { FoldStateChanged } from '../../../events-management/typing/interface';
 import { BasePanel } from './base-panel';
-import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
 import { updateDiagramSize } from '../../helpers';

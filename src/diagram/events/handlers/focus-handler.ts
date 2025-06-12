@@ -1,6 +1,4 @@
 import Events, { Handler } from '../events';
-import { FoldStateChanged } from '../../../events-management/typing/interface';
-import { EventID } from '../../../events-management/typing/constants';
 
 import { TriggerType } from '../../typing/constants';
 

@@ -1,11 +1,11 @@
-import { useSettingsContext } from '../../../../../../core/SettingsContext';
+import { useSettingsContext } from '../../../../../core/SettingsContext';
 import React, { useState } from 'react';
 import {
     DragItem,
     PanelPosition,
     Panels,
     PanelsConfig,
-} from '../../../../../../../typing/interfaces';
+} from '../../../../../../typing/interfaces';
 import { Platform } from 'obsidian';
 
 const calculatePosition = (

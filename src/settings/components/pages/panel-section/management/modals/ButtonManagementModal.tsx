@@ -4,7 +4,7 @@ import {
     ReactObsidianModal,
     ReactObsidianSetting,
 } from 'react-obsidian-setting';
-import { useSettingsContext } from '../../../../../core/SettingsContext';
+import { useSettingsContext } from '../../../../core/SettingsContext';
 
 interface ButtonManagementModalProps {
     onClose: () => void;

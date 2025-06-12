@@ -3,7 +3,6 @@ import { ButtonComponent, Notice } from 'obsidian';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
 import { useSettingsContext } from '../../../../core/SettingsContext';
 import { useLocation } from 'react-router-dom';
-import { EventID } from '../../../../../../events-management/typing/constants';
 
 /**
  * A React component that renders a button to reset settings to their default values.

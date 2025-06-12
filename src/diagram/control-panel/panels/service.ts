@@ -1,8 +1,5 @@
-import { Platform, setIcon } from 'obsidian';
+import { Platform } from 'obsidian';
 import { updateButton } from '../helpers/helpers';
-import { ControlPanel } from '../control-panel';
-import { EventID } from '../../../events-management/typing/constants';
-import { PanelsChangedVisibility } from '../../../events-management/typing/interface';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { BasePanel } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';

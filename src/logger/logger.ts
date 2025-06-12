@@ -55,8 +55,6 @@ export default class Logger {
             await this.plugin.app.vault.adapter.write(filepath, content);
 
             await this.rotateLogFiles(logsDir);
-
-            console.log(`DiagramZoomDrag: Logs are saved in${filepath}`);
         } catch (error) {
             console.error('DiagramZoomDrag: Error in the file:', error);
         }
