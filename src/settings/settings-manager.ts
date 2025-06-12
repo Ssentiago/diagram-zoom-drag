@@ -8,10 +8,6 @@ import {
     PanelsTriggering,
 } from './typing/interfaces';
 import EventEmitter2 from 'eventemitter2';
-import settings from './components/pages/diagram-section/settings/Settings';
-import { async } from 'rxjs';
-import resetSettings from './components/settings-page/routes-content/toolbar/reset-settings/ResetSettings';
-import { boolean, string } from 'superstruct';
 
 type ProxyWrapperMode = 'Events' | 'Settings';
 

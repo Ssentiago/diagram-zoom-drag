@@ -4,6 +4,14 @@ import { useSettingsContext } from '../../core/SettingsContext';
 import { normalizePath, Platform } from 'obsidian';
 import { DebugLevel } from '../../../typing/interfaces';
 
+/**
+ * The debug settings component.
+ *
+ * Provides settings for debugging, including logging enablement and level
+ * selection, log export and copying, and clearing of log storage.
+ *
+ * @returns The debug settings component.
+ */
 const Debug: React.FC = () => {
     const { plugin } = useSettingsContext();
     const [reload, setReload] = useState(false);
@@ -89,6 +97,7 @@ const Debug: React.FC = () => {
                 addDropdowns={[
                     (dropdown) => {
                         dropdown.addOptions({
+                            none: 'None',
                             error: 'Error',
                             warn: 'Warning',
                             info: 'Info',

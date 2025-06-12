@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "0e1c120f8029324e",
+        "id": "9509b384cf170925",
         "type": "tabs",
         "children": [
           {
-            "id": "d2dd2b995723397b",
+            "id": "99ebd0c0aaef6065",
             "type": "leaf",
             "state": {
               "type": "empty",
@@ -162,14 +162,14 @@
       "obsidian-mobile-emulator-toggle:Switch to PC emulation": false
     }
   },
-  "active": "46b953f1233777c4",
+  "active": "99ebd0c0aaef6065",
   "lastOpenFiles": [
+    "three simple mermaids.md",
     "simple mermaid.md",
+    "two simple mermaid and one huge.md",
     "huge plantuml.md",
     "graphviz.md",
     "mehrmaid.md",
-    "three simple mermaids.md",
-    "two simple mermaid and one huge.md",
     "very huge mermaid.md",
     "one huge mermaid and two mehrmaids.md",
     "many huge mermaids.md"

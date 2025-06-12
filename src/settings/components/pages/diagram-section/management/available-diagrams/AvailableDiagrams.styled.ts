@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { AnimationType } from './AvailableDiagrams';
 
 export const ButtonContainer = styled.div`
     position: relative;
@@ -50,4 +49,3 @@ export const PaginationControls = styled.div`
     align-items: center;
     gap: 20px;
 `;
-
