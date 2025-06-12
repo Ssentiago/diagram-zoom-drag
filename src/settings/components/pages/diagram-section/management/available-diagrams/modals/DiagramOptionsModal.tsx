@@ -37,7 +37,10 @@ export const DiagramOptionsModal: React.FC<DiagramOptionsProps> = ({
 
             {Object.entries(diagram.panels).map(([panel, { on }]) => (
                 <ReactObsidianSetting
-                    name={panel.charAt(0).concat(panel.slice(1).toLowerCase())}
+                    name={panel
+                        .charAt(0)
+                        .toUpperCase()
+                        .concat(panel.slice(1).toLowerCase())}
                     key={panel}
                     addToggles={[
                         (toggle) => {

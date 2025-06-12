@@ -121,6 +121,7 @@ const ButtonManagementModal: React.FC<ButtonManagementModalProps> = ({
                     <ReactObsidianSetting
                         name={panel
                             .charAt(0)
+                            .toUpperCase()
                             .concat(panel.slice(1).toLowerCase())}
                         setHeading
                     />

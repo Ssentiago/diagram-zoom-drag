@@ -104,13 +104,14 @@ const Management: React.FC = () => {
         <>
             <ReactObsidianSetting
                 name="Apply preset"
+                desc={'Apply button visibility preset'}
                 addDropdowns={[
                     (dropdown) => {
                         dropdown
                             .addOption('', 'Select preset...')
-                            .addOption('mobile', 'Mobile Minimal')
-                            .addOption('desktop', 'Desktop Full')
-                            .addOption('presentation', 'Presentation Mode')
+                            .addOption('mobile', 'Mobile minimal')
+                            .addOption('desktop', 'Desktop full')
+                            .addOption('presentation', 'Presentation mode')
                             .setValue(plugin.settings.data.panels.local.preset)
 
                             .onChange(async (value) => {
@@ -142,8 +143,8 @@ const Management: React.FC = () => {
                 ]}
             />
             <ReactObsidianSetting
-                name="Panel buttons"
-                desc={'Configure which buttons appear on each panel'}
+                name="Buttons layout"
+                desc={'Configure which buttons are shown on each panel'}
                 addButtons={[
                     (button) => {
                         button.setIcon('panels-top-left');
