@@ -127,11 +127,21 @@ export enum DebugLevel {
     Error = 'error',
 }
 
+interface Debug {
+    enabled: boolean;
+    level: DebugLevel;
+}
+
 export interface DefaultSettings {
+    version: string;
     panels: Panels;
     diagrams: Diagrams;
-    debug: {
-        enabled: boolean;
-        level: DebugLevel;
-    };
+    debug: Debug;
+}
+
+export interface MigrationResult {
+    success: boolean;
+    version: string;
+    data?: DefaultSettings;
+    errors?: string[];
 }

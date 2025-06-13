@@ -362,7 +362,6 @@ export default class Logger {
         }
 
         this.log('ERROR', message);
-        this.saveLogsToFile(this.exportLogs()).catch(console.error);
     }
 
     /**

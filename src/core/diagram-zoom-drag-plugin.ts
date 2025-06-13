@@ -38,6 +38,8 @@ export default class DiagramZoomDragPlugin extends Plugin {
         await this.initializeUI();
         await this.initializeEventSystem();
         await this.initializeUtils();
+
+        this.logger.info('Plugin initialized successfully.');
     }
 
     /**
@@ -66,7 +68,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
             wildcard: true,
             delimiter: '.',
         });
-        (window as any).plugin = this;
+        // (window as any).plugin = this;
 
         this.registerMarkdownPostProcessor(
             async (
@@ -74,7 +76,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
                 context: MarkdownPostProcessorContext
             ) => {
                 this.initializeView();
-                if (this.context.isValid && this.isInPreviewMode) {
+                if (this.context.isActive && this.isInPreviewMode) {
+                    this.logger.debug(
+                        'Calling withing the Markdown PostProcessor...'
+                    );
                     const adapter = new MarkdownPreviewAdapter(this, {
                         ...this.context.view!.file!.stat,
                     });
@@ -82,6 +87,9 @@ export default class DiagramZoomDragPlugin extends Plugin {
                         this.context.leafID!,
                         element,
                         context
+                    );
+                    this.logger.debug(
+                        'Initialized adapter for Preview Mode...'
                     );
                 }
             }
@@ -92,7 +100,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
 
                 this.initializeView();
 
-                if (!this.context.isValid) {
+                if (!this.context.isActive) {
                     return;
                 }
 
@@ -102,6 +110,9 @@ export default class DiagramZoomDragPlugin extends Plugin {
                 );
 
                 if (this.isInLivePreviewMode) {
+                    this.logger.debug(
+                        'Calling withing the layout-change-event...'
+                    );
                     const adapter = new MarkdownLivePreviewAdapter(this, {
                         ...this.context.view!.file!.stat,
                     });
@@ -110,6 +121,9 @@ export default class DiagramZoomDragPlugin extends Plugin {
                         this.context.view!.containerEl,
                         undefined,
                         this.hasObserver(this.context.leafID!)
+                    );
+                    this.logger.debug(
+                        'Initialized adapter for Live Preview Mode...'
                     );
                 }
             })
@@ -120,7 +134,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
 
                 this.initializeView();
 
-                if (this.context.isValid && this.isInLivePreviewMode) {
+                if (this.context.isActive && this.isInLivePreviewMode) {
+                    this.logger.debug(
+                        'Called withing the active-leaf-change event...'
+                    );
                     const adapter = new MarkdownLivePreviewAdapter(this, {
                         ...this.context.view!.file!.stat,
                     });
@@ -130,13 +147,16 @@ export default class DiagramZoomDragPlugin extends Plugin {
                         undefined,
                         this.hasObserver(this.context.leafID!)
                     );
+                    this.logger.debug(
+                        'Initialized adapter for Live Preview Mode...'
+                    );
                 }
             })
         );
         this.eventBus.on('diagram.created', (diagram: Diagram) => {
             const leafID = this.context.leafID;
             if (leafID === undefined) {
-                //
+                this.logger.error('No active leaf found.');
                 return;
             }
             this.state.pushDiagram(leafID, diagram);
@@ -158,10 +178,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
                 if (checking) {
                     return (
                         (this.isInLivePreviewMode || this.isInPreviewMode) &&
-                        this.context.isValid
+                        this.context.isActive
                     );
                 }
-                if (!this.context.isValid) {
+                if (!this.context.isActive) {
                     this.showNotice(
                         'This command can only be used when a Markdown view is open.'
                     );
@@ -182,6 +202,9 @@ export default class DiagramZoomDragPlugin extends Plugin {
                     ? 'Control panels hidden'
                     : 'Control panels shown';
                 this.showNotice(message);
+                this.logger.debug(
+                    'Called command `diagram-zoom-drag-toggle-panels-management-state`'
+                );
             },
         });
     }
@@ -212,6 +235,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     async onload(): Promise<void> {
         await this.initializePlugin();
+        this.logger.info('Plugin loaded successfully');
     }
 
     /**
@@ -223,8 +247,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {void} Void.
      */
     onunload(): void {
+        this.logger.debug('Plugin unloading...');
         this.state.clear();
         this.eventBus.removeAllListeners();
+        this.logger.info('Plugin unloaded successfully');
     }
 
     /**
@@ -256,7 +282,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {void} Void.
      */
     cleanupView(): void {
-        if (this.context?.leaf) {
+        if (this.context.leaf) {
             const isLeafAlive = this.app.workspace.getLeafById(
                 this.context.leaf.id
             );
@@ -289,7 +315,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {boolean} True if the current view is in preview mode, otherwise false.
      */
     get isInPreviewMode(): boolean {
-        const viewState = this.context?.view?.getState();
+        const viewState = this.context.view?.getState();
         return viewState?.mode === 'preview';
     }
 
@@ -309,11 +335,11 @@ export default class DiagramZoomDragPlugin extends Plugin {
      * @returns {boolean} True if the current view is in live preview mode, otherwise false.
      */
     get isInLivePreviewMode(): boolean {
-        const viewState = this.context?.view?.getState();
+        const viewState = this.context.view?.getState();
         return !viewState?.source && viewState?.mode === 'source';
     }
 
-    hasObserver(leafID: LeafID) {
+    hasObserver(leafID: LeafID): boolean {
         return !!this.state.getLivePreviewObserver(leafID);
     }
 }

@@ -14,55 +14,59 @@ export default class State {
 
     constructor(private plugin: DiagramZoomDragPlugin) {}
 
-    initializeLeaf(leafID: LeafID) {
+    initializeLeaf(leafID: LeafID): void {
         if (!this.data.get(leafID)) {
             this.data.set(leafID, {
                 diagrams: [],
                 livePreviewObserver: undefined,
             });
+            this.plugin.logger.debug(
+                `Initialized data for leaf width id: ${leafID}...`
+            );
         }
     }
 
-    cleanupLeaf(leafID: LeafID) {
+    cleanupLeaf(leafID: LeafID): void {
         const data = this.data.get(leafID);
         if (!data) {
+            this.plugin.logger.error(`No data for leafID: ${leafID}`);
             return;
         }
-        data.diagrams.forEach(
-            (d) =>
-                // d.active ...
-                // d.cleanup()
-                d
-        );
+        data.diagrams.forEach((d) => d.cleanUp());
         data.livePreviewObserver?.disconnect();
         data.livePreviewObserver = undefined;
         this.data.delete(leafID);
+        this.plugin.logger.debug(
+            `Data for leaf with id ${leafID} was cleaned successfully.`
+        );
     }
 
-    clear() {
+    clear(): void {
+        this.plugin.logger.debug('Started to clear state...');
         for (const leafID of this.data.keys()) {
             this.cleanupLeaf(leafID);
         }
+        this.plugin.logger.debug('State was cleared successfully.');
     }
 
-    getLivePreviewObserver(leafID: LeafID) {
+    getLivePreviewObserver(leafID: LeafID): MutationObserver | undefined {
         return this.data.get(leafID)?.livePreviewObserver;
     }
-    setLivePreviewObserver(leafID: LeafID, observer: MutationObserver) {
+    setLivePreviewObserver(leafID: LeafID, observer: MutationObserver): void {
         const data = this.data.get(leafID);
         if (data) {
             data.livePreviewObserver = observer;
         }
     }
 
-    getDiagrams(leafID: LeafID) {
+    getDiagrams(leafID: LeafID): any[] {
         return this.data.get(leafID)?.diagrams ?? [];
     }
 
-    pushDiagram(leafID: LeafID, diagram: Diagram) {
+    pushDiagram(leafID: LeafID, diagram: Diagram): void {
         const data = this.data.get(leafID);
         if (!data) {
-            console.error(`No data for leafID: ${leafID}`);
+            this.plugin.logger.error(`No data for leafID: ${leafID}`);
             return;
         }
         data.diagrams.push(diagram);
@@ -74,6 +78,7 @@ export default class State {
     ): Promise<void> {
         const data = this.data.get(leafID);
         if (!data) {
+            this.plugin.logger.error(`No data for leafID: ${leafID}`);
             return;
         }
 
@@ -82,6 +87,9 @@ export default class State {
         data.diagrams = data.diagrams.filter((diagram) => {
             if (currentFileCtime !== diagram.fileStats.ctime) {
                 diagram.cleanUp();
+                this.plugin.logger.debug(
+                    `Cleaned up diagram with id ${diagram.id} due to file change`
+                );
                 return false;
             }
             return true;

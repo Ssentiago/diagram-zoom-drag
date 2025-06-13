@@ -21,16 +21,21 @@ export class PluginContext implements IPluginContext {
         return this.leaf && (this.leaf.id as LeafID);
     }
 
-    /**
-     * Determines if the current plugin context is valid.
-     *
-     * A context is considered valid if both the `leaf` and `view`
-     * properties are defined, indicating an active workspace leaf
-     * with an associated Markdown view.
-     *
-     * @returns {boolean} True if the context is valid, otherwise false.
-     */
-    get isValid(): boolean {
-        return this.leaf !== undefined && this.view !== undefined;
+    get isActive(): boolean {
+        /**
+         * Determines if the plugin context is currently active.
+         *
+         * This method checks if both the workspace leaf and the Markdown view
+         * associated with the plugin context are defined. If both are present,
+         * it indicates that the plugin context is active.
+         *
+         * @returns {boolean} `true` if both `leaf` and `view` are defined,
+         * otherwise `false`.
+         */
+        return (
+            this.leaf !== undefined &&
+            this.view !== undefined &&
+            this.view.file !== null
+        );
     }
 }

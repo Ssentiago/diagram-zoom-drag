@@ -29,17 +29,17 @@ export const useHistory = <T extends readonly unknown[]>(
     const [undoDescription, setUndoDescription] = useState('');
     const [redoDescription, setRedoDescription] = useState('');
 
-    useEffect(() => {
-        (window as any).undoDebug = {
-            undoStack,
-            redoStack,
-            undoDescription,
-            redoDescription,
-            canUndo: undoStack.length > 0,
-            canRedo: redoStack.length > 0,
-            currentState: state,
-        };
-    }, [undoStack, redoStack, undoDescription, redoDescription, state]);
+    // useEffect(() => {
+    //     (window as any).undoDebug = {
+    //         undoStack,
+    //         redoStack,
+    //         undoDescription,
+    //         redoDescription,
+    //         canUndo: undoStack.length > 0,
+    //         canRedo: redoStack.length > 0,
+    //         currentState: state,
+    //     };
+    // }, [undoStack, redoStack, undoDescription, redoDescription, state]);
 
     useEffect(() => {}, [redoStack]);
 

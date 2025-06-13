@@ -1,7 +1,7 @@
 import React from 'react';
 import { ButtonComponent, Notice } from 'obsidian';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
-import { useSettingsContext } from '../../../../core/SettingsContext';
+import { useSettingsContext } from '../../../core/SettingsContext';
 import { useLocation } from 'react-router-dom';
 
 /**
@@ -32,7 +32,9 @@ const ResetSettings: React.FC = () => {
                         await plugin.settings.resetSettings();
                         plugin.settings.eventBus.emit('settings-reset');
                         forceReload();
-                        new Notice('Settings have been reset to default.');
+                        plugin.showNotice(
+                            'Settings have been reset to default.'
+                        );
                     });
                     return button;
                 },

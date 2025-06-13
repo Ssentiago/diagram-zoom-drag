@@ -24,17 +24,17 @@ export class FocusHandler implements Handler {
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'focusin',
-            this.focusIn.bind(this)
+            this.focusIn
         );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
             'focusout',
-            this.focusOut.bind(this)
+            this.focusOut
         );
     }
 
-    private focusIn(): void {
+    private focusIn = (): void => {
         if (
             this.events.diagram.plugin.settings.data.diagrams.folding
                 .autoFoldOnFocusChange
@@ -42,9 +42,9 @@ export class FocusHandler implements Handler {
             this.events.diagram.controlPanel.fold.unfold();
         }
         this.events.diagram.controlPanel.show(TriggerType.FOCUS);
-    }
+    };
 
-    private focusOut(): void {
+    private focusOut = (): void => {
         if (
             this.events.diagram.plugin.settings.data.diagrams.folding
                 .autoFoldOnFocusChange
@@ -52,7 +52,7 @@ export class FocusHandler implements Handler {
             this.events.diagram.controlPanel.fold.fold();
         }
         this.events.diagram.controlPanel.hide(TriggerType.FOCUS);
-    }
+    };
 
     cleanUp() {
         this.events.diagram.container.removeEventListener(

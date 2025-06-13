@@ -31,7 +31,7 @@ export class KeyboardHandler implements Handler {
      * @param container - The container element where the key event occurred.
      * @param event - The keyboard event that triggered the function.
      */
-    keyDown(event: KeyboardEvent): void {
+    keyDown = (event: KeyboardEvent): void => {
         const key = event.code;
         const KEYS = [
             'ArrowUp',
@@ -76,7 +76,7 @@ export class KeyboardHandler implements Handler {
                     break;
             }
         }
-    }
+    };
 
     cleanUp() {
         this.diagramEvents.diagram.container.removeEventListener(

@@ -2,6 +2,7 @@ import { BasePanel } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
 import { updateDiagramSize } from '../../helpers';
+import { setTooltip } from 'obsidian';
 
 export class FoldPanel extends BasePanel {
     constructor(public readonly controlPanel: IControlPanel) {
@@ -52,6 +53,13 @@ export class FoldPanel extends BasePanel {
                         this.controlPanel.diagram.container.dataset.folded ===
                         'true';
                     isFolded ? this.unfold() : this.fold();
+                    const button = this.panel.querySelector(
+                        '#diagram-fold-buttoч   n'
+                    ) as HTMLButtonElement;
+                    setTooltip(
+                        button,
+                        isFolded ? 'Fold diagram' : 'Expand diagram'
+                    );
                 },
                 title: isFolded ? 'Expand diagram' : 'Fold diagram',
                 id: 'diagram-fold-button',

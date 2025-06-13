@@ -8,6 +8,7 @@ import {
     PanelsTriggering,
 } from './typing/interfaces';
 import EventEmitter2 from 'eventemitter2';
+import { SettingsMigration } from './settingsMigration';
 
 type ProxyWrapperMode = 'Events' | 'Settings';
 
@@ -66,7 +67,7 @@ interface EventPath {
 }
 
 export type EventsWrapper<T> = {
-    [K in keyof T]: T[K] extends object ? EventsWrapper<T[K]> : EventPath; // вместо string
+    [K in keyof T]: T[K] extends object ? EventsWrapper<T[K]> : EventPath;
 } & {
     $path: string;
     $all: string;
@@ -129,6 +130,7 @@ export default class SettingsManager {
      */
     get defaultSettings(): DefaultSettings {
         return {
+            version: '5.3.0',
             diagrams: {
                 folding: {
                     foldByDefault: false,
@@ -178,24 +180,6 @@ export default class SettingsManager {
                     })
                 ),
             },
-            supported_diagrams: Object.entries(SupportedDiagrams).map(
-                ([key, value]) => ({
-                    name: key,
-                    selector: value,
-                    on: true,
-                    panels: {
-                        move: {
-                            on: true,
-                        },
-                        zoom: {
-                            on: true,
-                        },
-                        service: {
-                            on: true,
-                        },
-                    },
-                })
-            ),
             panels: {
                 global: {
                     triggering: {
@@ -249,64 +233,29 @@ export default class SettingsManager {
                     },
                 },
             },
-            panelsConfig: {
-                service: {
-                    enabled: true,
-                    position: {
-                        top: '0px',
-                        right: '0px',
-                    },
-                },
-                move: {
-                    enabled: true,
-                    position: {
-                        bottom: '0px',
-                        right: '0px',
-                    },
-                },
-                zoom: {
-                    enabled: true,
-                    position: {
-                        top: '50%',
-                        right: '0px',
-                    },
-                },
-            },
             debug: {
                 enabled: false,
                 level: DebugLevel.None,
             },
         } as DefaultSettings;
-    }
-    private deepMerge(defaults: any, user: any): any {
-        if (typeof defaults !== 'object' || defaults === null) {
-            return user !== undefined ? user : defaults;
-        }
-
-        if (Array.isArray(defaults)) {
-            return user !== undefined && Array.isArray(user) ? user : defaults;
-        }
-
-        const result = { ...defaults };
-
-        for (const key in user) {
-            if (key in defaults) {
-                result[key] = this.deepMerge(defaults[key], user[key]);
-            }
-        }
-
-        return result;
-    }
-    /**
+    } /**
      * Loads and initializes the plugin settings.
      *
      * @returns {Promise<void>} A promise that resolves when settings have been successfully loaded and applied.
      */
     async loadSettings(): Promise<void> {
         const userSettings = await this.plugin.loadData();
-        const defaultSettings = this.defaultSettings;
-
-        const settings = this.deepMerge(defaultSettings, userSettings);
+        debugger;
+        const result = SettingsMigration.migrate(userSettings);
+        let settings: DefaultSettings;
+        if (!result.success && result.errors) {
+            this.plugin.logger.error(
+                `Error loading settings: ${JSON.stringify(result.errors)}. Resetting to defaults...`
+            );
+            settings = this.defaultSettings;
+        } else {
+            settings = result.data!;
+        }
 
         this.data = createSettingsProxy(this.plugin, {
             ...settings,
@@ -323,7 +272,6 @@ export default class SettingsManager {
         const saveData = {
             ...this.data,
         };
-        // this.data = wrapWithProxy(this.plugin, JSON.parse(JSON.stringify(this.data)))
         await this.plugin.saveData(saveData);
     }
 

@@ -17,6 +17,7 @@ export default class DiagramFactory {
             sourceData,
             size,
         } as DiagramDescriptor;
+        plugin.logger.debug('Creating diagram...');
         const diagram = new Diagram(
             plugin,
             container,
@@ -24,6 +25,9 @@ export default class DiagramFactory {
             fileStats
         );
         diagram.initialize();
+        plugin.logger.debug(
+            'Diagram was created and initialized successfully.'
+        );
         return diagram;
     }
 }

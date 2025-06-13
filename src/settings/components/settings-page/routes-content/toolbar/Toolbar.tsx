@@ -1,7 +1,7 @@
 import React from 'react';
 import { Platform } from 'obsidian';
-import Navbar from './navbar/Navbar';
-import ResetSettings from './reset-settings/ResetSettings';
+import Navbar from './Navbar';
+import ResetSettings from './ResetSettings';
 
 import styled from 'styled-components';
 

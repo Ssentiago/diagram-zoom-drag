@@ -62,7 +62,7 @@ export class TouchHandler implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchStart(e: TouchEvent): void {
+    private touchStart = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
@@ -85,7 +85,7 @@ export class TouchHandler implements Handler {
             this.isPinching = true;
             this.initialDistance = this.calculateDistance(e.touches);
         }
-    }
+    };
 
     /**
      * Handles the `touchmove` event on the given container element.
@@ -107,7 +107,7 @@ export class TouchHandler implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchMove(e: TouchEvent): void {
+    private touchMove = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
@@ -140,7 +140,7 @@ export class TouchHandler implements Handler {
 
             this.initialDistance = currentDistance;
         }
-    }
+    };
 
     /**
      * Handles the `touchend` event on the given container element.
@@ -155,7 +155,7 @@ export class TouchHandler implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchEnd(e: TouchEvent): void {
+    private touchEnd = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
@@ -173,7 +173,7 @@ export class TouchHandler implements Handler {
 
         this.isDragging = false;
         this.isPinching = false;
-    }
+    };
 
     /**
      * Calculates the distance between the two touch points.

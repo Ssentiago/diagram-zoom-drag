@@ -20,16 +20,15 @@ export class ContextMenu implements Handler {
             container,
             'contextmenu',
             () => {
-                container.addEventListener(
-                    'contextmenu',
-                    this.handleContextMenu,
-                    true
-                );
+                container.addEventListener('contextmenu', this.onContextMenu, {
+                    capture: true,
+                    passive: false,
+                });
             }
         );
     }
 
-    handleContextMenu(event: MouseEvent) {
+    onContextMenu = (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         const isThereDiagramContainer: HTMLElement | null =
             target.closest('.diagram-container');
@@ -38,12 +37,12 @@ export class ContextMenu implements Handler {
             return;
         }
 
-        const isThisSvg = target.querySelector('svg') || target.closest('svg');
-
-        isThereDiagramContainer.focus();
-
         event.preventDefault();
         event.stopPropagation();
+
+        const isThisSvg = target.querySelector('svg') ?? target.closest('svg');
+
+        isThereDiagramContainer.focus();
 
         const menu = new Menu();
         menu.addItem((item) => {
@@ -68,12 +67,13 @@ export class ContextMenu implements Handler {
         });
 
         menu.showAtMouseEvent(event);
-    }
+    };
 
     cleanUp() {
         this.events.diagram.container.removeEventListener(
             'contextmenu',
-            this.handleContextMenu
+            this.onContextMenu,
+            { capture: true }
         );
     }
 }

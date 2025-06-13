@@ -46,7 +46,8 @@ export default class Diagram {
         this.events = new Events(this);
     }
 
-    initialize() {
+    initialize(): void {
+        this.plugin.logger.debug(`Initialize diagram with id ${this.id}`);
         this.controlPanel.initialize();
         this.events.initialize();
 
