@@ -1,9 +1,12 @@
 import Events, { Handler } from '../events';
 
 import { TriggerType } from '../../typing/constants';
+import { Component } from 'obsidian';
 
-export class FocusHandler implements Handler {
-    constructor(private readonly events: Events) {}
+export class FocusHandler extends Component implements Handler {
+    constructor(private readonly events: Events) {
+        super();
+    }
 
     /**
      * Adds focus event listeners to the given container element.
@@ -54,7 +57,9 @@ export class FocusHandler implements Handler {
         this.events.diagram.controlPanel.hide(TriggerType.FOCUS);
     };
 
-    cleanUp() {
+    onunload() {
+        super.onunload();
+        console.log('=== FOCUS HANDLER UNLOAD START ===');
         this.events.diagram.container.removeEventListener(
             'focusin',
             this.focusIn
@@ -63,5 +68,6 @@ export class FocusHandler implements Handler {
             'focusout',
             this.focusOut
         );
+        console.log('=== FOCUS HANDLER UNLOAD END ===');
     }
 }

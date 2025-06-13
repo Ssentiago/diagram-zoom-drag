@@ -1,13 +1,16 @@
 import Events, { Handler } from '../events';
 import { DiagramSelectors } from '../../typing/constants';
+import { Component } from 'obsidian';
 
-export class TouchHandler implements Handler {
+export class TouchHandler extends Component implements Handler {
     private startX!: number;
     private startY!: number;
     private initialDistance!: number;
     private isDragging = false;
     private isPinching = false;
-    constructor(private readonly diagramEvents: Events) {}
+    constructor(private readonly diagramEvents: Events) {
+        super();
+    }
 
     /**
      * Adds touch event listeners to the given container element.
@@ -188,7 +191,10 @@ export class TouchHandler implements Handler {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    cleanUp() {
+    onunload() {
+        super.onunload();
+        console.log('=== TOUCH HANDLER UNLOAD START ===');
+
         this.diagramEvents.diagram.container.removeEventListener(
             'touchstart',
             this.touchStart
@@ -201,5 +207,6 @@ export class TouchHandler implements Handler {
             'touchend',
             this.touchEnd
         );
+        console.log('=== TOUCH HANDLER UNLOAD END ===');
     }
 }

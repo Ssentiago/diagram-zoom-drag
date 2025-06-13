@@ -1,10 +1,16 @@
-import { BasePanel } from './base-panel';
+import { BasePanel, ButtonsData } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
 import { updateDiagramSize } from '../../helpers';
 import { setTooltip } from 'obsidian';
 
+enum FoldButtons {
+    Fold = 'fold',
+}
+
 export class FoldPanel extends BasePanel {
+    buttons = new Map<FoldButtons, ButtonsData>();
+
     constructor(public readonly controlPanel: IControlPanel) {
         super(controlPanel);
     }
@@ -41,7 +47,7 @@ export class FoldPanel extends BasePanel {
         action: () => void;
         title: string;
         active?: boolean;
-        id?: string;
+        id: FoldButtons;
     }> {
         const isFolded = this.diagram.container.dataset.folded === 'true';
 
@@ -53,16 +59,17 @@ export class FoldPanel extends BasePanel {
                         this.controlPanel.diagram.container.dataset.folded ===
                         'true';
                     isFolded ? this.unfold() : this.fold();
-                    const button = this.panel.querySelector(
-                        '#diagram-fold-buttoч   n'
-                    ) as HTMLButtonElement;
-                    setTooltip(
-                        button,
-                        isFolded ? 'Fold diagram' : 'Expand diagram'
-                    );
+
+                    const button = this.buttons.get(FoldButtons.Fold);
+                    if (button) {
+                        setTooltip(
+                            button.element,
+                            isFolded ? 'Fold diagram' : 'Expand diagram'
+                        );
+                    }
                 },
                 title: isFolded ? 'Expand diagram' : 'Fold diagram',
-                id: 'diagram-fold-button',
+                id: FoldButtons.Fold,
             },
         ];
     }
@@ -87,6 +94,10 @@ export class FoldPanel extends BasePanel {
                 true,
                 button.id
             );
+            this.buttons.set(button.id, {
+                element: btn,
+                listener: button.action,
+            });
             this.panel.appendChild(btn);
         });
     }

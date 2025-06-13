@@ -1,7 +1,10 @@
 import Events, { Handler } from '../events';
+import { Component } from 'obsidian';
 
-export class KeyboardHandler implements Handler {
-    constructor(private readonly diagramEvents: Events) {}
+export class KeyboardHandler extends Component implements Handler {
+    constructor(private readonly diagramEvents: Events) {
+        super();
+    }
 
     /**
      * Initializes the keyboard event handler for the given container element.
@@ -17,7 +20,7 @@ export class KeyboardHandler implements Handler {
             return;
         }
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
+        this.registerDomEvent(
             this.diagramEvents.diagram.container,
             'keydown',
             this.keyDown.bind(this)
@@ -78,10 +81,14 @@ export class KeyboardHandler implements Handler {
         }
     };
 
-    cleanUp() {
+    onunload() {
+        super.onunload();
+        console.log('=== KEYBOARD HANDLER UNLOAD START ===');
+
         this.diagramEvents.diagram.container.removeEventListener(
             'keydown',
             this.keyDown
         );
+        console.log('=== KEYBOARD HANDLER UNLOAD END ===');
     }
 }

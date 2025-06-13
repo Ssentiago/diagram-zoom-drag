@@ -6,6 +6,7 @@ import Diagram from 'diagram/diagram';
 import { IControlPanel } from './typing/interfaces';
 import { TriggerType } from '../typing/constants';
 import { Component } from 'obsidian';
+import { forEach } from 'lodash';
 
 export class ControlPanel extends Component {
     fold!: FoldPanel;
@@ -39,8 +40,7 @@ export class ControlPanel extends Component {
 
     private initializePanels(): void {
         [this.move, this.zoom, this.fold, this.service].forEach((panel) => {
-            if (panel instanceof ServicePanel) {
-            }
+            this.addChild(panel);
             panel.initialize();
         });
     }
@@ -67,7 +67,9 @@ export class ControlPanel extends Component {
         );
     }
 
-    cleanUp() {
-        this.unload();
+    onunload(): void {
+        console.log('ControlPanel unload START');
+        super.onunload();
+        console.log('ControlPanel unload END');
     }
 }

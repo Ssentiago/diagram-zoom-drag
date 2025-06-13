@@ -1,11 +1,19 @@
 import { Platform } from 'obsidian';
 import { updateButton } from '../helpers/helpers';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
-import { BasePanel } from './base-panel';
+import { BasePanel, ButtonsData } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
 
+enum ServiceButtons {
+    Hide = 'hide',
+    Fullscreen = 'fullscreen',
+    Touch = 'touch',
+}
+
 export class ServicePanel extends BasePanel {
+    buttons = new Map<ServiceButtons, ButtonsData>();
+
     hiding = false;
 
     constructor(controlPanel: IControlPanel) {
@@ -59,7 +67,7 @@ export class ServicePanel extends BasePanel {
         action: () => void;
         title: string;
         active?: boolean;
-        id?: string;
+        id: ServiceButtons;
     }> {
         const buttons = [];
         const container = this.diagram.container;
@@ -68,6 +76,7 @@ export class ServicePanel extends BasePanel {
                 .buttons.hide
         ) {
             buttons.push({
+                id: ServiceButtons.Hide,
                 icon: this.hiding ? 'eye-off' : 'eye',
                 action: (): void => {
                     this.hiding
@@ -85,7 +94,6 @@ export class ServicePanel extends BasePanel {
                         );
                 },
                 title: `Hide move and zoom panels`,
-                id: 'hide-show-button-diagram',
             });
         }
         if (
@@ -93,6 +101,7 @@ export class ServicePanel extends BasePanel {
                 .buttons.fullscreen
         ) {
             buttons.push({
+                id: ServiceButtons.Fullscreen,
                 icon: 'maximize',
                 action: async (): Promise<void> => {
                     const button: HTMLElement | null =
@@ -121,11 +130,11 @@ export class ServicePanel extends BasePanel {
                     }
                 },
                 title: 'Open in fullscreen mode',
-                id: 'fullscreen-button',
             });
         }
         if (Platform.isMobileApp) {
             buttons.push({
+                id: ServiceButtons.Touch,
                 icon: this.diagram.nativeTouchEventsEnabled
                     ? 'circle-slash-2'
                     : 'hand',
@@ -156,7 +165,6 @@ export class ServicePanel extends BasePanel {
                     );
                 },
                 title: `${this.diagram.nativeTouchEventsEnabled ? 'Enable' : 'Disable'} move and pinch zoom`,
-                id: 'native-touch-event',
             });
         }
 
@@ -182,11 +190,20 @@ export class ServicePanel extends BasePanel {
         );
 
         const serviceButtons = this.getButtons();
-        serviceButtons.forEach((btn) =>
-            this.panel.appendChild(
-                this.createButton(btn.icon, btn.action, btn.title, true, btn.id)
-            )
-        );
+        serviceButtons.forEach((btn) => {
+            const button = this.createButton(
+                btn.icon,
+                btn.action,
+                btn.title,
+                true,
+                btn.id
+            );
+            this.buttons.set(btn.id, {
+                element: button,
+                listener: btn.action,
+            });
+            this.panel.appendChild(button);
+        });
     }
 
     /**

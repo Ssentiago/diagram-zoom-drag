@@ -1,6 +1,6 @@
 import DiagramZoomDragPlugin from './diagram-zoom-drag-plugin';
 import Diagram from '../diagram/diagram';
-import { FileStats } from 'obsidian';
+import { Component, FileStats } from 'obsidian';
 
 export interface Data {
     diagrams: Diagram[];
@@ -32,7 +32,14 @@ export default class State {
             this.plugin.logger.error(`No data for leafID: ${leafID}`);
             return;
         }
-        data.diagrams.forEach((d) => d.cleanUp());
+        console.log('About to unload diagrams:', data.diagrams.length);
+        data.diagrams.forEach((d, index) => {
+            console.log(`Unloading diagram ${index}:`, d);
+            console.log('Has unload method:', typeof d.unload === 'function');
+            console.log('Is Component:', d instanceof Component);
+            console.log('Diagram loaded:', (d as any)._loaded);
+            d.unload(); // ИМЕННО unload(), не onunload()!
+        });
         data.livePreviewObserver?.disconnect();
         data.livePreviewObserver = undefined;
         this.data.delete(leafID);
@@ -86,7 +93,7 @@ export default class State {
 
         data.diagrams = data.diagrams.filter((diagram) => {
             if (currentFileCtime !== diagram.fileStats.ctime) {
-                diagram.cleanUp();
+                diagram.unload();
                 this.plugin.logger.debug(
                     `Cleaned up diagram with id ${diagram.id} due to file change`
                 );

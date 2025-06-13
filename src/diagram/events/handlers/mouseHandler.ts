@@ -3,15 +3,18 @@ import { DiagramSelectors, TriggerType } from '../../typing/constants';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { Simulate } from 'react-dom/test-utils';
 import mouseLeave = Simulate.mouseLeave;
+import { Component } from 'obsidian';
 
-export class MouseHandler implements Handler {
+export class MouseHandler extends Component implements Handler {
     private startX!: number;
     private startY!: number;
     private initialX!: number;
     private initialY!: number;
     private isDragging = false;
 
-    constructor(private readonly events: Events) {}
+    constructor(private readonly events: Events) {
+        super();
+    }
 
     /**
      * Adds mouse event listeners to the given container element.
@@ -219,7 +222,10 @@ export class MouseHandler implements Handler {
         this.events.diagram.controlPanel.hide(TriggerType.MOUSE);
     };
 
-    cleanUp() {
+    onunload() {
+        super.onunload();
+        console.log('=== MOUSE HANDLER UNLOAD START ===');
+
         this.events.diagram.container.removeEventListener('wheel', this.wheel);
         this.events.diagram.container.removeEventListener(
             'mousedown',
@@ -245,5 +251,6 @@ export class MouseHandler implements Handler {
             'mouseleave',
             this.mouseLeaveOutDiagram
         );
+        console.log('=== MOUSE HANDLER UNLOAD END ===');
     }
 }

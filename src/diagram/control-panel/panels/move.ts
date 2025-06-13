@@ -1,9 +1,22 @@
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
-import { BasePanel } from './base-panel';
+import { BasePanel, ButtonsData } from './base-panel';
 
 import { IControlPanel } from '../typing/interfaces';
 
+enum MoveButtons {
+    Up = 'up',
+    Down = 'down',
+    Left = 'left',
+    Right = 'right',
+    UpRight = 'upRight',
+    UpLeft = 'upLeft',
+    DownLeft = 'downLeft',
+    DownRight = 'downRight',
+}
+
 export class MovePanel extends BasePanel {
+    buttons = new Map<MoveButtons, ButtonsData>();
+
     constructor(controlPanel: IControlPanel) {
         super(controlPanel);
     }
@@ -52,14 +65,14 @@ export class MovePanel extends BasePanel {
         action: () => void;
         title: string;
         active?: boolean;
-        id?: string;
+        id: MoveButtons;
         gridArea: string;
     }> {
         const moveButtons =
             this.diagram.plugin.settings.data.panels.local.panels.move.buttons;
         const buttons = [
             {
-                key: 'upLeft',
+                id: MoveButtons.UpLeft,
                 icon: 'arrow-up-left',
                 title: 'Move up left',
                 gridArea: '1 / 1',
@@ -67,7 +80,7 @@ export class MovePanel extends BasePanel {
                 y: 50,
             },
             {
-                key: 'up',
+                id: MoveButtons.Up,
                 icon: 'arrow-up',
                 title: 'Move up',
                 gridArea: '1 / 2',
@@ -75,7 +88,7 @@ export class MovePanel extends BasePanel {
                 y: 50,
             },
             {
-                key: 'upRight',
+                id: MoveButtons.UpRight,
                 icon: 'arrow-up-right',
                 title: 'Move up right',
                 gridArea: '1 / 3',
@@ -83,7 +96,7 @@ export class MovePanel extends BasePanel {
                 y: 50,
             },
             {
-                key: 'left',
+                id: MoveButtons.Left,
                 icon: 'arrow-left',
                 title: 'Move left',
                 gridArea: '2 / 1',
@@ -91,7 +104,7 @@ export class MovePanel extends BasePanel {
                 y: 0,
             },
             {
-                key: 'right',
+                id: MoveButtons.Right,
                 icon: 'arrow-right',
                 title: 'Move right',
                 gridArea: '2 / 3',
@@ -99,7 +112,7 @@ export class MovePanel extends BasePanel {
                 y: 0,
             },
             {
-                key: 'downLeft',
+                id: MoveButtons.DownLeft,
                 icon: 'arrow-down-left',
                 title: 'Move down left',
                 gridArea: '3 / 1',
@@ -107,7 +120,7 @@ export class MovePanel extends BasePanel {
                 y: -50,
             },
             {
-                key: 'down',
+                id: MoveButtons.Down,
                 icon: 'arrow-down',
                 title: 'Move down',
                 gridArea: '3 / 2',
@@ -115,7 +128,7 @@ export class MovePanel extends BasePanel {
                 y: -50,
             },
             {
-                key: 'downRight',
+                id: MoveButtons.DownRight,
                 icon: 'arrow-down-right',
                 title: 'Move down right',
                 gridArea: '3 / 3',
@@ -126,9 +139,10 @@ export class MovePanel extends BasePanel {
 
         return buttons
             .filter(
-                (config) => moveButtons[config.key as keyof typeof moveButtons]
+                (config) => moveButtons[config.id as keyof typeof moveButtons]
             )
             .map((config) => ({
+                id: config.id,
                 icon: config.icon,
                 action: () =>
                     this.diagram.actions.moveElement(config.x, config.y, true),
@@ -164,6 +178,10 @@ export class MovePanel extends BasePanel {
                 btn.id
             );
             button.style.gridArea = btn.gridArea;
+            this.buttons.set(btn.id, {
+                element: button,
+                listener: btn.action,
+            });
             this.panel.appendChild(button);
         });
     }

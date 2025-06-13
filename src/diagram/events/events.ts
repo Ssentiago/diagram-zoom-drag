@@ -5,13 +5,13 @@ import { FocusHandler } from './handlers/focus-handler';
 import { DiagramData } from '../../settings/typing/interfaces';
 import Diagram from '../diagram';
 import { ContextMenu } from './handlers/context-menu/context-menu';
+import { Component } from 'obsidian';
 
 export interface Handler {
     initialize(): void;
-    cleanUp(): void;
 }
 
-export default class Events {
+export default class Events extends Component {
     private readonly mouse: MouseHandler;
     private readonly touch: TouchHandler;
     private readonly keyboard: KeyboardHandler;
@@ -19,11 +19,18 @@ export default class Events {
     private readonly contextMenu: ContextMenu;
 
     constructor(public diagram: Diagram) {
+        super();
         this.mouse = new MouseHandler(this);
         this.touch = new TouchHandler(this);
         this.keyboard = new KeyboardHandler(this);
         this.focus = new FocusHandler(this);
         this.contextMenu = new ContextMenu(this);
+
+        this.addChild(this.mouse);
+        this.addChild(this.touch);
+        this.addChild(this.keyboard);
+        this.addChild(this.focus);
+        this.addChild(this.contextMenu);
     }
 
     initialize(): void {
@@ -34,13 +41,9 @@ export default class Events {
         this.contextMenu.initialize();
     }
 
-    cleanUp() {
-        [
-            this.mouse,
-            this.touch,
-            this.keyboard,
-            this.focus,
-            this.contextMenu,
-        ].forEach((handler) => handler.cleanUp());
+    onunload(): void {
+        super.onunload();
+        console.log('=== EVENTS UNLOAD START ===');
+        console.log('=== EVENTS HANDLER UNLOAD END ===');
     }
 }

@@ -11,10 +11,12 @@ export default class Logger {
     private readonly maxEntries = 2000;
     private readonly storageKey: string;
     private isStorageAvailable = true;
+    logsDir!: string;
 
     constructor(public plugin: DiagramZoomDragPlugin) {
         this.storageKey = `${plugin.manifest.id}-logs`;
         this.checkStorageAvailability();
+        this.ensureLogsDirExists();
     }
 
     /**
@@ -38,26 +40,28 @@ export default class Logger {
      */
     async saveLogsToFile(content: string): Promise<void> {
         try {
-            const pluginDir = this.plugin.manifest.dir;
-            if (pluginDir === undefined) {
-                throw new Error(
-                    `DiagramZoomDrag: It was not possible to get the way to the plugin. Path:${pluginDir}`
-                );
-            }
-            const logsDir = normalizePath(`${pluginDir}/logs`);
-            const exists = await this.plugin.app.vault.adapter.exists(logsDir);
-            exists && (await this.plugin.app.vault.adapter.mkdir(logsDir));
-
             const now = moment().format('YYYY-MM-DD HH:mm:ss');
             const filename = `logs-${now}.json`;
-            const filepath = normalizePath(`${logsDir}/${filename}`);
+            const filepath = normalizePath(`${this.logsDir}/${filename}`);
 
             await this.plugin.app.vault.adapter.write(filepath, content);
 
-            await this.rotateLogFiles(logsDir);
+            await this.rotateLogFiles(this.logsDir);
         } catch (error) {
             console.error('DiagramZoomDrag: Error in the file:', error);
         }
+    }
+
+    async ensureLogsDirExists() {
+        const pluginDir = this.plugin.manifest.dir;
+        if (pluginDir === undefined) {
+            throw new Error(
+                `DiagramZoomDrag: It was not possible to get the way to the plugin. Path:${pluginDir}`
+            );
+        }
+        this.logsDir = normalizePath(`${pluginDir}/logs`);
+        const exists = await this.plugin.app.vault.adapter.exists(this.logsDir);
+        !exists && (await this.plugin.app.vault.adapter.mkdir(this.logsDir));
     }
 
     /**

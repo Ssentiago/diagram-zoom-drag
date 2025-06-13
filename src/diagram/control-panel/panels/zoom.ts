@@ -1,9 +1,17 @@
 import { ControlPanel } from '../control-panel';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
-import { BasePanel } from './base-panel';
+import { BasePanel, ButtonsData } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';
 
+enum ZoomButtons {
+    In = 'in',
+    Out = 'out',
+    Reset = 'reset',
+}
+
 export class ZoomPanel extends BasePanel {
+    buttons = new Map<ZoomButtons, ButtonsData>();
+
     constructor(controlPanel: IControlPanel) {
         super(controlPanel);
     }
@@ -61,7 +69,7 @@ export class ZoomPanel extends BasePanel {
         action: () => void;
         title: string;
         active?: boolean;
-        id?: string;
+        id: ZoomButtons;
     }> {
         const zoomBtn =
             this.controlPanel.diagram.plugin.settings.data.panels.local.panels
@@ -70,6 +78,7 @@ export class ZoomPanel extends BasePanel {
 
         if (zoomBtn.in) {
             buttons.push({
+                id: ZoomButtons.In,
                 icon: 'zoom-in',
                 action: (): void =>
                     this.controlPanel.diagram.actions.zoomElement(1.1, true),
@@ -78,6 +87,7 @@ export class ZoomPanel extends BasePanel {
         }
         if (zoomBtn.reset) {
             buttons.push({
+                id: ZoomButtons.Reset,
                 icon: 'refresh-cw',
                 action: (): void =>
                     this.controlPanel.diagram.actions.resetZoomAndMove(true),
@@ -86,6 +96,7 @@ export class ZoomPanel extends BasePanel {
         }
         if (zoomBtn.out) {
             buttons.push({
+                id: ZoomButtons.Out,
                 icon: 'zoom-out',
                 action: (): void =>
                     this.controlPanel.diagram.actions.zoomElement(0.9, true),

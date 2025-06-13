@@ -245,7 +245,6 @@ export default class SettingsManager {
      */
     async loadSettings(): Promise<void> {
         const userSettings = await this.plugin.loadData();
-        debugger;
         const result = SettingsMigration.migrate(userSettings);
         let settings: DefaultSettings;
         if (!result.success && result.errors) {
@@ -254,6 +253,9 @@ export default class SettingsManager {
             );
             settings = this.defaultSettings;
         } else {
+            this.plugin.logger.info(
+                `Settings migrated successfully to ${result.version}`
+            );
             settings = result.data!;
         }
 

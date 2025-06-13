@@ -1,14 +1,15 @@
 import { Export } from './context-actions/export';
-import { Menu } from 'obsidian';
+import { Component, Menu } from 'obsidian';
 import { CopyDiagram } from './context-actions/copy-diagram';
 import { CopyDiagramSource } from './context-actions/copy-diagram-source';
 import Events, { Handler } from '../../events';
 
-export class ContextMenu implements Handler {
+export class ContextMenu extends Component implements Handler {
     private readonly export: Export;
     private readonly copy: CopyDiagram;
     private readonly copySource: CopyDiagramSource;
     constructor(public readonly events: Events) {
+        super();
         this.export = new Export(this);
         this.copy = new CopyDiagram(this);
         this.copySource = new CopyDiagramSource(this);
@@ -16,16 +17,12 @@ export class ContextMenu implements Handler {
 
     initialize(): void {
         const container = this.events.diagram.container;
-        this.events.diagram.plugin.context.view?.registerDomEvent(
-            container,
-            'contextmenu',
-            () => {
-                container.addEventListener('contextmenu', this.onContextMenu, {
-                    capture: true,
-                    passive: false,
-                });
-            }
-        );
+        this.registerDomEvent(container, 'contextmenu', () => {
+            container.addEventListener('contextmenu', this.onContextMenu, {
+                capture: true,
+                passive: false,
+            });
+        });
     }
 
     onContextMenu = (event: MouseEvent) => {
@@ -69,11 +66,14 @@ export class ContextMenu implements Handler {
         menu.showAtMouseEvent(event);
     };
 
-    cleanUp() {
+    onunload() {
+        super.onunload();
+        console.log('=== CONTEXT MENU HANDLER UNLOAD START ===');
         this.events.diagram.container.removeEventListener(
             'contextmenu',
             this.onContextMenu,
             { capture: true }
         );
+        console.log('=== CONTEXT MENU HANDLER UNLOAD END ===');
     }
 }

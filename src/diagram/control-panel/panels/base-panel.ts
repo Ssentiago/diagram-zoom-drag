@@ -6,8 +6,14 @@ import { hide } from 'concurrently/dist/src/defaults';
 import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { Component } from 'obsidian';
 
+export interface ButtonsData {
+    element: HTMLButtonElement;
+    listener: (event: MouseEvent) => void;
+}
+
 export abstract class BasePanel extends Component {
     protected panel!: HTMLElement;
+    protected buttons!: Map<any, ButtonsData>;
 
     constructor(protected controlPanel: IControlPanel) {
         super();
@@ -170,5 +176,11 @@ export abstract class BasePanel extends Component {
         // in that way we can add support to mouse (focus) triggering. or for keypress
 
         return base;
+    }
+
+    onunload(): void {
+        super.onunload();
+        console.log(`=== PANEL \`${this.cssClass}\` UNLOAD START ===`);
+        console.log(`=== PANEL \`${this.cssClass}\` UNLOAD END ===`);
     }
 }
