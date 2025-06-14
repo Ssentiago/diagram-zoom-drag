@@ -43,7 +43,5 @@ export default class Events extends Component {
 
     onunload(): void {
         super.onunload();
-        console.log('=== EVENTS UNLOAD START ===');
-        console.log('=== EVENTS HANDLER UNLOAD END ===');
     }
 }

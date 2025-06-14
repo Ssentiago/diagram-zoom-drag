@@ -98,11 +98,11 @@ export class ServicePanel extends BasePanel {
 
                     updateButton(
                         button,
-                        !isCurrentlyHiding ? 'eye' : 'eye-off',
-                        `${isCurrentlyHiding ? 'Show' : 'Hide'} move and zoom panels`
+                        isCurrentlyHiding ? 'eye' : 'eye-off',
+                        `Panels are ${willBeHiding ? 'hidden' : 'visible'} (click to toggle)`
                     );
                 },
-                title: `Hide move and zoom panels`,
+                title: `Panels are visible (click to toggle)`,
                 dataAttributes: {
                     hiding: 'false',
                 },

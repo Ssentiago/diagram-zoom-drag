@@ -256,7 +256,6 @@ export class MouseHandler extends Component implements Handler {
 
     onunload() {
         super.onunload();
-        console.log('=== MOUSE HANDLER UNLOAD START ===');
 
         this.events.diagram.container.removeEventListener('wheel', this.wheel);
         this.events.diagram.container.removeEventListener(
@@ -283,6 +282,5 @@ export class MouseHandler extends Component implements Handler {
             'mouseleave',
             this.mouseLeaveOutDiagram
         );
-        console.log('=== MOUSE HANDLER UNLOAD END ===');
     }
 }

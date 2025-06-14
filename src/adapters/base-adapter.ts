@@ -247,12 +247,21 @@ export abstract class BaseAdapter {
      */
     protected initializationGuard(el: HTMLElement): boolean {
         if (!el.parentElement) {
+            this.plugin.logger.debug(
+                'Initialization guard failed: no parent element'
+            );
             return false;
         }
         if (el.parentElement.hasClass('diagram-container')) {
+            this.plugin.logger.debug(
+                'Initialization guard failed: already in diagram-container'
+            );
             return false;
         }
         if (el.hasClass('diagram-content')) {
+            this.plugin.logger.debug(
+                'Initialization guard failed: already has diagram-content class'
+            );
             return false;
         }
 
@@ -265,6 +274,10 @@ export abstract class BaseAdapter {
         sourceData: SourceData,
         size: DiagramSize
     ): void {
+        this.plugin.logger.debug('Creating diagram', {
+            id: container.id,
+            type: diagramDescriptor.diagramData.name,
+        });
         const diagram = DiagramFactory.createDiagram(
             this.plugin,
             diagramDescriptor,

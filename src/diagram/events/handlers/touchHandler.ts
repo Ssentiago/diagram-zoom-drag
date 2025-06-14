@@ -193,7 +193,6 @@ export class TouchHandler extends Component implements Handler {
 
     onunload() {
         super.onunload();
-        console.log('=== TOUCH HANDLER UNLOAD START ===');
 
         this.diagramEvents.diagram.container.removeEventListener(
             'touchstart',
@@ -207,6 +206,5 @@ export class TouchHandler extends Component implements Handler {
             'touchend',
             this.touchEnd
         );
-        console.log('=== TOUCH HANDLER UNLOAD END ===');
     }
 }

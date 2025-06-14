@@ -59,7 +59,7 @@ export class FocusHandler extends Component implements Handler {
 
     onunload() {
         super.onunload();
-        console.log('=== FOCUS HANDLER UNLOAD START ===');
+
         this.events.diagram.container.removeEventListener(
             'focusin',
             this.focusIn
@@ -68,6 +68,5 @@ export class FocusHandler extends Component implements Handler {
             'focusout',
             this.focusOut
         );
-        console.log('=== FOCUS HANDLER UNLOAD END ===');
     }
 }

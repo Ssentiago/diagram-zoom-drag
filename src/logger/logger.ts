@@ -290,7 +290,7 @@ export default class Logger {
      * @param {string} level - The severity level of the message (e.g., 'debug', 'info', 'warn', 'error').
      * @param {string} message - The message to log.
      */
-    private log(level: string, message: string): void {
+    private log(level: string, message: string, context?: any): void {
         if (!this.plugin.settings.data.debug.enabled) {
             return;
         }
@@ -298,6 +298,7 @@ export default class Logger {
             timestamp: new Date().toISOString(),
             level: level,
             message: message,
+            context: context,
         };
 
         this.addLogEntry(logEntry);
@@ -329,7 +330,7 @@ export default class Logger {
      *
      * @param message The debug message to log.
      */
-    debug(message: string): void {
+    debug(message: string, context?: any): void {
         if (!this.shouldLog('debug')) {
             return;
         }
@@ -348,7 +349,7 @@ export default class Logger {
      *
      * @param message The warning message to log.
      */
-    warn(message: string): void {
+    warn(message: string, context?: any): void {
         if (!this.shouldLog('warn')) {
             return;
         }
@@ -360,12 +361,12 @@ export default class Logger {
      *
      * @param message The error message to log.
      */
-    error(message: string): void {
+    error(message: string, context?: any): void {
         if (!this.shouldLog('error')) {
             return;
         }
 
-        this.log('ERROR', message);
+        this.log('ERROR', message, context);
     }
 
     /**
@@ -400,7 +401,7 @@ export default class Logger {
             const time = date.toLocaleTimeString();
             const dateStr = date.toLocaleDateString();
 
-            result += `[${dateStr} ${time}] ${log.level}: ${log.message}\n`;
+            result += `[${dateStr} ${time}] ${log.level}: ${log.message} ${log.context ? `context: ${JSON.stringify(log.context, null, 2)}` : ''}\n`;
             result += '\n';
         });
 

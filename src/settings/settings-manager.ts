@@ -8,7 +8,7 @@ import {
     PanelsTriggering,
 } from './typing/interfaces';
 import EventEmitter2 from 'eventemitter2';
-import { SettingsMigration } from './settingsMigration';
+import { SettingsMigration } from './settings-migration';
 
 type ProxyWrapperMode = 'Events' | 'Settings';
 
@@ -115,6 +115,7 @@ export default class SettingsManager {
     eventBus: EventEmitter2;
     events!: EventsWrapper<DefaultSettings>;
     data!: DefaultSettings;
+    migration: SettingsMigration;
 
     constructor(public plugin: DiagramZoomDragPlugin) {
         this.plugin = plugin;
@@ -122,6 +123,7 @@ export default class SettingsManager {
             wildcard: true,
             delimiter: '.',
         });
+        this.migration = new SettingsMigration(this);
     }
 
     /**
@@ -245,27 +247,31 @@ export default class SettingsManager {
      */
     async loadSettings(): Promise<void> {
         const userSettings = await this.plugin.loadData();
-        const result = SettingsMigration.migrate(userSettings);
+        const result = this.migration.migrate(userSettings);
         let settings: DefaultSettings;
+        let needsSave = false;
+
         if (!result.success && result.errors) {
-            this.plugin.logger.error(
-                `Error loading settings: ${JSON.stringify(result.errors)}. Resetting to defaults...`
+            console.error(
+                `Diagram Zoom Drag: \`Error loading settings: ${JSON.stringify(result.errors)}. Resetting to defaults...\``
             );
             settings = this.defaultSettings;
+            needsSave = true;
         } else {
-            // this.plugin.logger.info(
-            //     `Settings migrated successfully to ${result.version}`
-            // );
             settings = result.data!;
+            needsSave =
+                userSettings?.version !== this.migration.CURRENT_VERSION;
         }
 
         this.data = createSettingsProxy(this.plugin, {
             ...settings,
         });
         this.events = createEventsWrapper(settings);
-    }
 
-    /**
+        if (needsSave) {
+            await this.saveSettings();
+        }
+    } /**
      * Saves the current plugin settings.
      *
      * @returns {Promise<void>} A promise that resolves when the settings have been successfully saved.

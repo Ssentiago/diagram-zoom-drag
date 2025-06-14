@@ -29,16 +29,15 @@ export default class State {
     cleanupLeaf(leafID: LeafID): void {
         const data = this.data.get(leafID);
         if (!data) {
-            this.plugin.logger.error(`No data for leafID: ${leafID}`);
+            this.plugin.logger.error(`No data for leaf`, { leafID });
             return;
         }
-        console.log('About to unload diagrams:', data.diagrams.length);
+
         data.diagrams.forEach((d, index) => {
-            console.log(`Unloading diagram ${index}:`, d);
-            console.log('Has unload method:', typeof d.unload === 'function');
-            console.log('Is Component:', d instanceof Component);
-            console.log('Diagram loaded:', (d as any)._loaded);
-            d.unload(); // ИМЕННО unload(), не onunload()!
+            d.unload();
+            this.plugin.logger.debug(`Unloaded diagram`, {
+                diagramName: d.diagramDescriptor.diagramData.name,
+            });
         });
         data.livePreviewObserver?.disconnect();
         data.livePreviewObserver = undefined;

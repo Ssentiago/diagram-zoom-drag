@@ -40,6 +40,7 @@ export default class Diagram extends Component {
         fileStats: FileStats
     ) {
         super();
+
         this.container = container;
         this.originalParent = container.parentNode as HTMLElement;
 
@@ -49,9 +50,16 @@ export default class Diagram extends Component {
         this.actions = new DiagramActions(this);
         this.controlPanel = new ControlPanel(this);
         this.events = new Events(this);
+
         this.addChild(this.events);
         this.addChild(this.controlPanel);
+
         this.load();
+
+        this.plugin.logger.debug('Diagram created', {
+            id: this.id,
+            name: this.diagramDescriptor.diagramData.name,
+        });
     }
 
     initialize(): void {
@@ -70,10 +78,15 @@ export default class Diagram extends Component {
             this.diagramDescriptor.diagramElement,
             this.container
         );
+        this.plugin.logger.debug('Diagram initialized successfully', {
+            id: this.id,
+        });
     }
 
     restoreOriginalDom(): void {
-        console.log('=== ORIGINAL DOM RESTORING START ===');
+        this.plugin.logger.debug('Restoring original DOM for diagram', {
+            id: this.id,
+        });
         const element = this.diagramDescriptor.diagramElement;
         element.setCssStyles({
             transform: 'none',
@@ -84,13 +97,11 @@ export default class Diagram extends Component {
         element.removeClass('diagram-content');
         this.container.remove();
         originalParent.appendChild(element);
-        console.log('=== ORIGINAL DOM RESTORING END ===');
     }
 
     onunload(): void {
-        console.log('=== DIAGRAM UNLOAD START ===');
         this.restoreOriginalDom();
+        this.plugin.logger.debug('Diagram unloaded', { id: this.id });
         super.onunload();
-        console.log('=== DIAGRAM UNLOAD END ===');
     }
 }

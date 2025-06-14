@@ -180,7 +180,5 @@ export abstract class BasePanel extends Component {
 
     onunload(): void {
         super.onunload();
-        console.log(`=== PANEL \`${this.cssClass}\` UNLOAD START ===`);
-        console.log(`=== PANEL \`${this.cssClass}\` UNLOAD END ===`);
     }
 }

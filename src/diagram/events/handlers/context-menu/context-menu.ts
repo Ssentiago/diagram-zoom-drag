@@ -68,12 +68,11 @@ export class ContextMenu extends Component implements Handler {
 
     onunload() {
         super.onunload();
-        console.log('=== CONTEXT MENU HANDLER UNLOAD START ===');
+
         this.events.diagram.container.removeEventListener(
             'contextmenu',
             this.onContextMenu,
             { capture: true }
         );
-        console.log('=== CONTEXT MENU HANDLER UNLOAD END ===');
     }
 }

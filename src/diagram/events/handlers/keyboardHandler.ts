@@ -83,12 +83,10 @@ export class KeyboardHandler extends Component implements Handler {
 
     onunload() {
         super.onunload();
-        console.log('=== KEYBOARD HANDLER UNLOAD START ===');
 
         this.diagramEvents.diagram.container.removeEventListener(
             'keydown',
             this.keyDown
         );
-        console.log('=== KEYBOARD HANDLER UNLOAD END ===');
     }
 }

@@ -68,8 +68,6 @@ export class ControlPanel extends Component {
     }
 
     onunload(): void {
-        console.log('ControlPanel unload START');
         super.onunload();
-        console.log('ControlPanel unload END');
     }
 }

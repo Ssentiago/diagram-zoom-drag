@@ -52,6 +52,13 @@ export default class DiagramZoomDragPlugin extends Plugin {
     async initializeCore(): Promise<void> {
         this.settings = new SettingsManager(this);
         await this.settings.loadSettings();
+
+        this.logger = new Logger(this);
+        await this.logger.init();
+        this.logger.debug(
+            'Settings loaded, logger initialized successfully. Starting to initializing plugin...'
+        );
+
         this.addSettingTab(new SettingsTab(this.app, this));
         this.context = new PluginContext();
         this.state = new State(this);
@@ -160,6 +167,10 @@ export default class DiagramZoomDragPlugin extends Plugin {
                 return;
             }
             this.state.pushDiagram(leafID, diagram);
+            this.logger.debug('Diagram added to state', {
+                leafID,
+                diagramName: diagram.diagramDescriptor.diagramData.name,
+            });
         });
     }
 
@@ -220,9 +231,6 @@ export default class DiagramZoomDragPlugin extends Plugin {
      */
     async initializeUtils(): Promise<void> {
         this.pluginStateChecker = new PluginStateChecker(this);
-        this.logger = new Logger(this);
-        await this.logger.init();
-        await this.logger.saveLogsToFile(this.logger.exportLogs());
     }
 
     /**
@@ -284,9 +292,12 @@ export default class DiagramZoomDragPlugin extends Plugin {
     cleanupView(): void {
         if (this.context.leaf) {
             const isLeafAlive = this.app.workspace.getLeafById(
-                this.context.leaf.id
+                this.context.leafID!
             );
             if (isLeafAlive === null) {
+                this.logger.debug(`Dead leaf found. Cleaning up...`, {
+                    leafID: this.context.leaf.id,
+                });
                 this.state.cleanupLeaf(this.context.leafID!);
                 this.context.view = undefined;
                 this.context.leaf = undefined;
