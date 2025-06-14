@@ -17,15 +17,13 @@ export class ContextMenu extends Component implements Handler {
 
     initialize(): void {
         const container = this.events.diagram.container;
-        this.registerDomEvent(container, 'contextmenu', () => {
-            container.addEventListener('contextmenu', this.onContextMenu, {
-                capture: true,
-                passive: false,
-            });
+        this.registerDomEvent(container, 'contextmenu', this.onContextMenu, {
+            capture: true,
+            passive: false,
         });
     }
 
-    onContextMenu = (event: MouseEvent) => {
+    private readonly onContextMenu = (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         const isThereDiagramContainer: HTMLElement | null =
             target.closest('.diagram-container');
@@ -65,14 +63,4 @@ export class ContextMenu extends Component implements Handler {
 
         menu.showAtMouseEvent(event);
     };
-
-    onunload() {
-        super.onunload();
-
-        this.events.diagram.container.removeEventListener(
-            'contextmenu',
-            this.onContextMenu,
-            { capture: true }
-        );
-    }
 }

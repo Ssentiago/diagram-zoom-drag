@@ -40,7 +40,7 @@ const RoutesContent: React.FC = () => {
                         element={<DiagramSection />}
                     />
                     <Route path="/panel-section/*" element={<PanelSection />} />
-                    {/*<Route path={'/debug/*'} element={<Debug />} />*/}
+                    <Route path={'/debug/*'} element={<Debug />} />
                     <Route path={'/about'} element={<About />} />
                 </Routes>
             </AnimatedRoutes>

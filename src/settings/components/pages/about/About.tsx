@@ -1,4 +1,3 @@
-// About.tsx
 import { useSettingsContext } from '../../core/SettingsContext';
 import React from 'react';
 import { ReactObsidianSetting } from 'react-obsidian-setting';
@@ -15,8 +14,9 @@ const About: React.FC = () => {
                         button.setIcon('github');
                         button.setTooltip('Go to GitHub page of this plugin');
                         button.onClick(() => {
-                            open(
-                                'https://github.com/Ssentiago/diagram-zoom-drag/'
+                            window.open(
+                                'https://github.com/Ssentiago/diagram-zoom-drag/',
+                                '_blank'
                             );
                         });
                         return button;

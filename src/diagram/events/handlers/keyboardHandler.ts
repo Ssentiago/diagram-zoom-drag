@@ -23,7 +23,7 @@ export class KeyboardHandler extends Component implements Handler {
         this.registerDomEvent(
             this.diagramEvents.diagram.container,
             'keydown',
-            this.keyDown.bind(this)
+            this.keyDown
         );
     }
 
@@ -80,13 +80,4 @@ export class KeyboardHandler extends Component implements Handler {
             }
         }
     };
-
-    onunload() {
-        super.onunload();
-
-        this.diagramEvents.diagram.container.removeEventListener(
-            'keydown',
-            this.keyDown
-        );
-    }
 }

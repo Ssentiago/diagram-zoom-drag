@@ -75,7 +75,7 @@ export default class DiagramZoomDragPlugin extends Plugin {
             wildcard: true,
             delimiter: '.',
         });
-        // (window as any).plugin = this;
+        (window as any).plugin = this;
 
         this.registerMarkdownPostProcessor(
             async (

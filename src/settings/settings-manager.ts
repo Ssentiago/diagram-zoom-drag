@@ -246,26 +246,32 @@ export default class SettingsManager {
      * @returns {Promise<void>} A promise that resolves when settings have been successfully loaded and applied.
      */
     async loadSettings(): Promise<void> {
-        const userSettings = await this.plugin.loadData();
-        const result = this.migration.migrate(userSettings);
+        const userSettings =
+            (await this.plugin.loadData()) ?? this.defaultSettings;
+        const migrationResult = this.migration.migrate(userSettings);
+
         let settings: DefaultSettings;
         let needsSave = false;
 
-        if (!result.success && result.errors) {
+        if (!migrationResult.success) {
             console.error(
-                `Diagram Zoom Drag: \`Error loading settings: ${JSON.stringify(result.errors)}. Resetting to defaults...\``
+                `Diagram Zoom Drag: Error loading settings: ${JSON.stringify(migrationResult.errors)}. Resetting to defaults...`
+            );
+            settings = this.defaultSettings;
+            needsSave = true;
+        } else if (!migrationResult.data) {
+            console.error(
+                'Migration succeeded but data is empty. Using defaults...'
             );
             settings = this.defaultSettings;
             needsSave = true;
         } else {
-            settings = result.data!;
+            settings = migrationResult.data;
             needsSave =
                 userSettings?.version !== this.migration.CURRENT_VERSION;
         }
 
-        this.data = createSettingsProxy(this.plugin, {
-            ...settings,
-        });
+        this.data = createSettingsProxy(this.plugin, { ...settings });
         this.events = createEventsWrapper(settings);
 
         if (needsSave) {

@@ -22,9 +22,9 @@ const Navbar: React.FC = () => (
             <NavbarTab as={NavLink} to={'/panel-section'} draggable={false}>
                 Panel
             </NavbarTab>
-            {/*<NavbarTab as={NavLink} to={'/Debug/'} draggable={false}>*/}
-            {/*    Debug*/}
-            {/*</NavbarTab>*/}
+            <NavbarTab as={NavLink} to={'/Debug/'} draggable={false}>
+                Debug
+            </NavbarTab>
             <NavbarTab as={NavLink} to={'/about'} draggable={false}>
                 About
             </NavbarTab>

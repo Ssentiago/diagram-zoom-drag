@@ -37,7 +37,7 @@ export class FocusHandler extends Component implements Handler {
         );
     }
 
-    private focusIn = (): void => {
+    private readonly focusIn = (): void => {
         if (
             this.events.diagram.plugin.settings.data.diagrams.folding
                 .autoFoldOnFocusChange
@@ -47,7 +47,7 @@ export class FocusHandler extends Component implements Handler {
         this.events.diagram.controlPanel.show(TriggerType.FOCUS);
     };
 
-    private focusOut = (): void => {
+    private readonly focusOut = (): void => {
         if (
             this.events.diagram.plugin.settings.data.diagrams.folding
                 .autoFoldOnFocusChange
@@ -56,17 +56,4 @@ export class FocusHandler extends Component implements Handler {
         }
         this.events.diagram.controlPanel.hide(TriggerType.FOCUS);
     };
-
-    onunload() {
-        super.onunload();
-
-        this.events.diagram.container.removeEventListener(
-            'focusin',
-            this.focusIn
-        );
-        this.events.diagram.container.removeEventListener(
-            'focusout',
-            this.focusOut
-        );
-    }
 }

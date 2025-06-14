@@ -19,17 +19,24 @@ export class CopyDiagram {
         const svg = element.querySelector('svg');
         const img = element.querySelector('img');
 
-        if (svg) {
-            await this.copySvg(svg);
+        try {
+            if (svg) {
+                await this.copySvg(svg);
+            } else if (img) {
+                await this.copyImg(img);
+            } else {
+                console.error(
+                    'Neither SVG nor IMG element found in the container'
+                );
+                return;
+            }
+
             plugin.showNotice('Copied');
-        } else if (img) {
-            await this.copyImg(img);
-            plugin.showNotice('Copied');
-        } else {
-            console.error('Neither SVG nor IMG element found in the container');
+        } catch (error) {
+            plugin.showNotice('Copy failed');
+            console.error('Copy operation failed:', error);
         }
     }
-
     private async copyImg(img: HTMLImageElement): Promise<void> {
         fetch(img.src)
             .then((response) => response.blob())

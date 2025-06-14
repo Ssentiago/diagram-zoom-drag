@@ -38,59 +38,33 @@ export class MouseHandler extends Component implements Handler {
             return;
         }
 
-        if (!this.events.diagram.plugin.context.view) {
-            return;
-        }
+        this.registerDomEvent(container, 'wheel', this.wheel, {
+            passive: true,
+        });
+        this.registerDomEvent(container, 'wheel', this.wheelScroll, {
+            passive: true,
+        });
 
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'wheel',
-            this.wheel,
-            { passive: true }
-        );
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'wheel',
-            this.wheelScroll,
-            { passive: true }
-        );
+        this.registerDomEvent(container, 'mousedown', this.mouseDown);
 
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'mousedown',
-            this.mouseDown
-        );
+        this.registerDomEvent(container, 'mousemove', this.mouseMove);
 
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'mousemove',
-            this.mouseMove
-        );
+        this.registerDomEvent(container, 'mouseup', this.mouseUp);
+        this.registerDomEvent(container, 'mouseleave', this.mouseLeave);
 
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'mouseup',
-            this.mouseUp
-        );
-        this.events.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'mouseleave',
-            this.mouseLeave
-        );
-
-        this.events.diagram.plugin.context.view.registerDomEvent(
+        this.registerDomEvent(
             container,
             'mouseenter',
             this.mouseEnterOnDiagram
         );
-        this.events.diagram.plugin.context.view.registerDomEvent(
+        this.registerDomEvent(
             container,
             'mouseleave',
             this.mouseLeaveOutDiagram
         );
     }
 
-    get elements() {
+    get elements(): { container: HTMLElement; diagramElement: HTMLElement } {
         const container = this.events.diagram.container;
         const diagramElement =
             this.events.diagram.diagramDescriptor.diagramElement;
@@ -109,7 +83,7 @@ export class MouseHandler extends Component implements Handler {
      * @param diagramElement - The diagram element.
      * @param event - The wheel event.
      */
-    private wheel = (event: WheelEvent): void => {
+    private readonly wheel = (event: WheelEvent): void => {
         if (
             !event.ctrlKey &&
             document.fullscreenElement !== this.events.diagram.container
@@ -142,7 +116,7 @@ export class MouseHandler extends Component implements Handler {
         });
     };
 
-    private wheelScroll = (event: WheelEvent): void => {
+    private readonly wheelScroll = (event: WheelEvent): void => {
         if (!(event.shiftKey || event.altKey)) {
             return;
         }
@@ -172,7 +146,7 @@ export class MouseHandler extends Component implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the function.
      */
-    private mouseDown = (event: MouseEvent): void => {
+    private readonly mouseDown = (event: MouseEvent): void => {
         if (event.button !== 0) {
             return;
         }
@@ -201,7 +175,7 @@ export class MouseHandler extends Component implements Handler {
      * @param diagramElement - The diagram element that is being moved.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseMove = (event: MouseEvent): void => {
+    private readonly mouseMove = (event: MouseEvent): void => {
         if (!this.isDragging) {
             return;
         }
@@ -225,7 +199,7 @@ export class MouseHandler extends Component implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseUp = (event: MouseEvent): void => {
+    private readonly mouseUp = (event: MouseEvent): void => {
         const { container, diagramElement } = this.elements;
 
         this.isDragging = false;
@@ -242,45 +216,15 @@ export class MouseHandler extends Component implements Handler {
      * @param diagramElement - The diagram element where the event occurred.
      * @param event - The mouse event that triggered the method.
      */
-    private mouseLeave = (event: MouseEvent): void => {
+    private readonly mouseLeave = (event: MouseEvent): void => {
         this.mouseUp(event);
     };
 
-    private mouseEnterOnDiagram = (e: MouseEvent): void => {
+    private readonly mouseEnterOnDiagram = (e: MouseEvent): void => {
         this.events.diagram.controlPanel.show(TriggerType.MOUSE);
     };
 
-    private mouseLeaveOutDiagram = (e: MouseEvent): void => {
+    private readonly mouseLeaveOutDiagram = (e: MouseEvent): void => {
         this.events.diagram.controlPanel.hide(TriggerType.MOUSE);
     };
-
-    onunload() {
-        super.onunload();
-
-        this.events.diagram.container.removeEventListener('wheel', this.wheel);
-        this.events.diagram.container.removeEventListener(
-            'mousedown',
-            this.mouseDown
-        );
-        this.events.diagram.container.removeEventListener(
-            'mousemove',
-            this.mouseMove
-        );
-        this.events.diagram.container.removeEventListener(
-            'mouseup',
-            this.mouseUp
-        );
-        this.events.diagram.container.removeEventListener(
-            'mouseleave',
-            this.mouseLeave
-        );
-        this.events.diagram.container.removeEventListener(
-            'mouseenter',
-            this.mouseEnterOnDiagram
-        );
-        this.events.diagram.container.removeEventListener(
-            'mouseleave',
-            this.mouseLeaveOutDiagram
-        );
-    }
 }

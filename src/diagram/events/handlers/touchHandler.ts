@@ -24,28 +24,16 @@ export class TouchHandler extends Component implements Handler {
      */
     initialize(): void {
         const container = this.diagramEvents.diagram.container;
-        if (!this.diagramEvents.diagram.plugin.context.view) {
-            return;
-        }
 
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'touchstart',
-            this.touchStart,
-            { passive: false }
-        );
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'touchmove',
-            this.touchMove,
-            { passive: false }
-        );
-        this.diagramEvents.diagram.plugin.context.view.registerDomEvent(
-            container,
-            'touchend',
-            this.touchEnd,
-            { passive: false }
-        );
+        this.registerDomEvent(container, 'touchstart', this.touchStart, {
+            passive: false,
+        });
+        this.registerDomEvent(container, 'touchmove', this.touchMove, {
+            passive: false,
+        });
+        this.registerDomEvent(container, 'touchend', this.touchEnd, {
+            passive: false,
+        });
     }
 
     /**
@@ -65,12 +53,10 @@ export class TouchHandler extends Component implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchStart = (e: TouchEvent): void => {
+    private readonly touchStart = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
-        const container = this.diagramEvents.diagram.container;
-
         const target = e.target as HTMLElement;
 
         // we got touch to a button panel - returning
@@ -110,7 +96,7 @@ export class TouchHandler extends Component implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchMove = (e: TouchEvent): void => {
+    private readonly touchMove = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
@@ -158,7 +144,7 @@ export class TouchHandler extends Component implements Handler {
      * @param container - The container element that received the touch event.
      * @param e - The `TouchEvent` object that represents the touch event.
      */
-    private touchEnd = (e: TouchEvent): void => {
+    private readonly touchEnd = (e: TouchEvent): void => {
         if (this.diagramEvents.diagram.nativeTouchEventsEnabled) {
             return;
         }
@@ -189,22 +175,5 @@ export class TouchHandler extends Component implements Handler {
         const dx = touch2.clientX - touch1.clientX;
         const dy = touch2.clientY - touch1.clientY;
         return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    onunload() {
-        super.onunload();
-
-        this.diagramEvents.diagram.container.removeEventListener(
-            'touchstart',
-            this.touchStart
-        );
-        this.diagramEvents.diagram.container.removeEventListener(
-            'touchmove',
-            this.touchMove
-        );
-        this.diagramEvents.diagram.container.removeEventListener(
-            'touchend',
-            this.touchEnd
-        );
     }
 }

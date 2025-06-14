@@ -130,6 +130,7 @@ export default class Logger {
      */
     private async writeSystemInfo(): Promise<void> {
         const systemInfo = this.getSystemInfo();
+        console.log('write ss');
         this.addLogEntry(systemInfo);
     }
 
@@ -183,6 +184,27 @@ export default class Logger {
             },
             storage: {
                 localStorage_usage: this.getStorageUsage(),
+            },
+        };
+    }
+
+    getShortSystemInfo() {
+        return {
+            timestamp: moment().toISOString(),
+            obsidian: {
+                version: this.getObsidianVersion(),
+                vault_name: this.plugin.app.vault.getName(),
+                is_mobile: Platform.isMobile,
+            },
+            system: {
+                platform: this.getPlatformInfo(),
+                language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+            plugin: {
+                name: this.plugin.manifest.name,
+                version: this.plugin.manifest.version,
+                id: this.plugin.manifest.id,
             },
         };
     }

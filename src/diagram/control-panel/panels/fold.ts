@@ -3,6 +3,7 @@ import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
 import { updateDiagramSize } from '../../helpers';
 import { setTooltip } from 'obsidian';
+import { updateButton } from '../helpers/helpers';
 
 enum FoldButtons {
     Fold = 'fold',
@@ -62,8 +63,9 @@ export class FoldPanel extends BasePanel {
 
                     const button = this.buttons.get(FoldButtons.Fold);
                     if (button) {
-                        setTooltip(
+                        updateButton(
                             button.element,
+                            isFolded ? 'fold-vertical' : 'unfold-vertical',
                             isFolded ? 'Fold diagram' : 'Expand diagram'
                         );
                     }

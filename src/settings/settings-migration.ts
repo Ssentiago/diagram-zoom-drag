@@ -32,10 +32,6 @@ export class SettingsMigration {
                 migrated = this.settingsManager.defaultSettings;
             }
 
-            if (!this.validateMigrated(migrated)) {
-                throw new Error('Migration result validation failed');
-            }
-
             return {
                 success: true,
                 version: this.CURRENT_VERSION,
@@ -50,15 +46,5 @@ export class SettingsMigration {
                 ],
             };
         }
-    }
-
-    private validateMigrated(data: any): data is DefaultSettings {
-        return (
-            data &&
-            typeof data.version === 'string' &&
-            data.diagrams &&
-            data.panels &&
-            data.debug
-        );
     }
 }

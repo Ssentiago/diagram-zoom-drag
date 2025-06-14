@@ -1,7 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { ReactObsidianSetting } from 'react-obsidian-setting';
+import {
+    ReactObsidianModal,
+    ReactObsidianSetting,
+} from 'react-obsidian-setting';
 import { useSettingsContext } from '../../core/SettingsContext';
-import { normalizePath, Platform } from 'obsidian';
 import { DebugLevel } from '../../../typing/interfaces';
 
 /**
@@ -52,7 +54,7 @@ const Debug: React.FC = () => {
                         button.setTooltip('Report an issue');
                         button.onClick(async () => {
                             const systemInfo = JSON.stringify(
-                                plugin.logger.getSystemInfo(),
+                                plugin.logger.getShortSystemInfo(),
                                 null,
                                 2
                             );
@@ -68,6 +70,7 @@ const Debug: React.FC = () => {
                             const githubUrl =
                                 `https://github.com/Ssentiago/diagram-zoom-drag/issues/new?` +
                                 `title=${encodeURIComponent('[Bug Report] ')}&` +
+                                `labels=bug&` +
                                 `body=${issueBody}`;
                             window.open(githubUrl, '_blank');
                         });
@@ -113,6 +116,20 @@ const Debug: React.FC = () => {
                         return dropdown;
                     },
                 ]}
+            />
+
+            <ReactObsidianSetting
+                name={'About exported logs'}
+                addMultiDesc={(multiDesc) => {
+                    multiDesc.addDescriptions([
+                        'Exported logs contain:',
+                        '• Complete system information (OS, hardware, plugins)',
+                        '• Debug events with timestamps',
+                        '• Performance metrics',
+                        'Review logs before sharing - remove sensitive data if needed.',
+                    ]);
+                    return multiDesc;
+                }}
             />
 
             <ReactObsidianSetting
