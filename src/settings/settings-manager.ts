@@ -253,9 +253,9 @@ export default class SettingsManager {
             );
             settings = this.defaultSettings;
         } else {
-            this.plugin.logger.info(
-                `Settings migrated successfully to ${result.version}`
-            );
+            // this.plugin.logger.info(
+            //     `Settings migrated successfully to ${result.version}`
+            // );
             settings = result.data!;
         }
 

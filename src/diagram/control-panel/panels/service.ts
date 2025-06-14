@@ -4,6 +4,7 @@ import { PanelsTriggering } from '../../../settings/typing/interfaces';
 import { BasePanel, ButtonsData } from './base-panel';
 import { IControlPanel } from '../typing/interfaces';
 import { TriggerType } from '../../typing/constants';
+import { button } from 'blessed';
 
 enum ServiceButtons {
     Hide = 'hide',
@@ -13,8 +14,6 @@ enum ServiceButtons {
 
 export class ServicePanel extends BasePanel {
     buttons = new Map<ServiceButtons, ButtonsData>();
-
-    hiding = false;
 
     constructor(controlPanel: IControlPanel) {
         super(controlPanel);
@@ -68,6 +67,9 @@ export class ServicePanel extends BasePanel {
         title: string;
         active?: boolean;
         id: ServiceButtons;
+        dataAttributes?: {
+            [key: string]: string;
+        };
     }> {
         const buttons = [];
         const container = this.diagram.container;
@@ -77,23 +79,33 @@ export class ServicePanel extends BasePanel {
         ) {
             buttons.push({
                 id: ServiceButtons.Hide,
-                icon: this.hiding ? 'eye-off' : 'eye',
+                icon: 'eye',
                 action: (): void => {
-                    this.hiding
+                    const button = this.buttons.get(ServiceButtons.Hide)
+                        ?.element as HTMLButtonElement | undefined;
+                    if (!button) {
+                        return;
+                    }
+                    const isCurrentlyHiding = button.dataset.hiding === 'true';
+
+                    const willBeHiding = !isCurrentlyHiding;
+
+                    button.dataset.hiding = willBeHiding.toString();
+
+                    isCurrentlyHiding
                         ? this.controlPanel.show(TriggerType.SERVICE_HIDING)
                         : this.controlPanel.hide(TriggerType.SERVICE_HIDING);
-                    const button: HTMLElement | null = this.panel.querySelector(
-                        '#hide-show-button-diagram'
+
+                    updateButton(
+                        button,
+                        !isCurrentlyHiding ? 'eye' : 'eye-off',
+                        `${isCurrentlyHiding ? 'Show' : 'Hide'} move and zoom panels`
                     );
-                    this.hiding = !this.hiding;
-                    button &&
-                        updateButton(
-                            button,
-                            !this.hiding ? 'eye' : 'eye-off',
-                            `${this.hiding ? 'Show' : 'Hide'} move and zoom panels`
-                        );
                 },
                 title: `Hide move and zoom panels`,
+                dataAttributes: {
+                    hiding: 'false',
+                },
             });
         }
         if (
@@ -104,8 +116,8 @@ export class ServicePanel extends BasePanel {
                 id: ServiceButtons.Fullscreen,
                 icon: 'maximize',
                 action: async (): Promise<void> => {
-                    const button: HTMLElement | null =
-                        container.querySelector('#fullscreen-button');
+                    const button = this.buttons.get(ServiceButtons.Fullscreen)
+                        ?.element as HTMLButtonElement | undefined;
                     if (!button) {
                         return;
                     }
@@ -142,9 +154,9 @@ export class ServicePanel extends BasePanel {
                     this.diagram.nativeTouchEventsEnabled =
                         !this.diagram.nativeTouchEventsEnabled;
 
-                    const btn: HTMLElement | null = this.panel?.querySelector(
-                        '#native-touch-event'
-                    );
+                    const btn: HTMLElement | undefined = this.buttons.get(
+                        ServiceButtons.Touch
+                    )?.element;
                     if (!btn) {
                         return;
                     }
@@ -198,6 +210,11 @@ export class ServicePanel extends BasePanel {
                 true,
                 btn.id
             );
+            if (btn.dataAttributes) {
+                Object.entries(btn.dataAttributes).forEach(([key, value]) => {
+                    button.setAttribute(key, value);
+                });
+            }
             this.buttons.set(btn.id, {
                 element: button,
                 listener: btn.action,
@@ -220,8 +237,9 @@ export class ServicePanel extends BasePanel {
      *   and zoom panels.
      */
     setupEventListeners(): void {
-        const fullscreenButton: HTMLElement | null =
-            this.panel.querySelector('#fullscreen-button');
+        const fullscreenButton: HTMLElement | undefined = this.buttons.get(
+            ServiceButtons.Fullscreen
+        )?.element;
 
         if (!fullscreenButton) {
             return;
@@ -230,15 +248,7 @@ export class ServicePanel extends BasePanel {
         this.diagram.plugin.context.view?.registerDomEvent(
             this.diagram.container,
             'fullscreenchange',
-            this.onFullScreenChange.bind(
-                this,
-                this.diagram.container,
-                fullscreenButton
-            )
-        );
-
-        const hidingB: HTMLElement | null = this.panel?.querySelector(
-            '#hide-show-button-diagram'
+            this.onFullScreenChange
         );
     }
 
@@ -253,10 +263,13 @@ export class ServicePanel extends BasePanel {
      * @param button - The button element to update with the corresponding icon
      * and tooltip for fullscreen mode.
      */
-    private onFullScreenChange(
-        container: HTMLElement,
-        button: HTMLElement
-    ): void {
+    private onFullScreenChange = (): void => {
+        const button: HTMLElement | undefined = this.buttons.get(
+            ServiceButtons.Fullscreen
+        )?.element;
+        if (!button) {
+            return;
+        }
         if (document.fullscreenElement) {
             requestAnimationFrame(() => {
                 this.diagram.actions.resetZoomAndMove();
@@ -268,10 +281,10 @@ export class ServicePanel extends BasePanel {
             });
             updateButton(button, 'maximize', 'Open in fullscreen mode');
         }
-    }
+    };
 
     protected get supportedTriggers(): number {
-        const base = super.supportedTriggers;
+        const base = super.supportedTriggers & ~TriggerType.SERVICE_HIDING;
         const shouldIgnoreExternalTriggers =
             this.diagram.plugin.settings.data.panels.global.triggering
                 .ignoreService;
@@ -280,8 +293,7 @@ export class ServicePanel extends BasePanel {
             return base;
         }
 
-        const unSupportedFlags =
-            TriggerType.SERVICE_HIDING | TriggerType.MOUSE | TriggerType.FOCUS;
+        const unSupportedFlags = TriggerType.MOUSE | TriggerType.FOCUS;
         return base & ~unSupportedFlags;
     }
 }

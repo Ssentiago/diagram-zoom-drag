@@ -48,6 +48,12 @@ export class MouseHandler extends Component implements Handler {
             this.wheel,
             { passive: true }
         );
+        this.events.diagram.plugin.context.view.registerDomEvent(
+            container,
+            'wheel',
+            this.wheelScroll,
+            { passive: true }
+        );
 
         this.events.diagram.plugin.context.view.registerDomEvent(
             container,
@@ -110,6 +116,11 @@ export class MouseHandler extends Component implements Handler {
         ) {
             return;
         }
+
+        if (event.shiftKey || event.altKey) {
+            return;
+        }
+
         const { container, diagramElement } = this.elements;
 
         const rect = diagramElement.getBoundingClientRect();
@@ -129,6 +140,27 @@ export class MouseHandler extends Component implements Handler {
         diagramElement.setCssStyles({
             transform: `translate(${this.events.diagram.dx}px, ${this.events.diagram.dy}px) scale(${this.events.diagram.scale})`,
         });
+    };
+
+    private wheelScroll = (event: WheelEvent): void => {
+        if (!(event.shiftKey || event.altKey)) {
+            return;
+        }
+
+        const isHorizontal = event.shiftKey && !event.altKey;
+        const isVertical = event.shiftKey && event.altKey;
+
+        let x = 0,
+            y = 0;
+
+        if (isHorizontal) {
+            x = event.deltaY > 0 ? 20 : -20;
+        }
+        if (isVertical) {
+            y = event.deltaY > 0 ? 20 : -20;
+        }
+
+        this.events.diagram.actions.moveElement(x, y, true);
     };
 
     /**
